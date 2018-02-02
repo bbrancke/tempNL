@@ -1,0 +1,64 @@
+// From:
+https://stackoverflow.com/questions/21846965/set-wireless-channel-using-netlink-api
+// aircrack-ng: src/osdep/linux.c
+
+static int ieee80211_channel_to_frequency(int chan){
+    if (chan < 14)
+        return 2407 + chan * 5;
+
+    if (chan == 14)
+        return 2484;
+
+    /* FIXME: dot11ChannelStartingFactor (802.11-2007 17.3.8.3.2) */
+    return (chan + 1000) * 5;
+}
+
+static int linux_set_channel_nl80211(struct wif *wi, int channel)
+{
+    struct priv_linux *dev = wi_priv(wi);
+    char s[32];
+    int pid, status, unused;
+
+    unsigned int devid;
+    struct nl_msg *msg;
+    unsigned int freq;
+    unsigned int htval = NL80211_CHAN_NO_HT;
+    memset( s, 0, sizeof( s ) );
+
+// Use libnl:
+    chan=channel;
+
+/* if_nametoindex is defined in net/if.h but that conflicts with linux/if.h */
+// extern unsigned int if_nametoindex(const char *__ifname);
+// (appears to be a built-in function, esp. if version supports nl80211)
+
+    devid=if_nametoindex(wi->wi_interface);
+    freq=ieee80211_channel_to_frequency(channel);
+// Put into base class:
+    msg=nlmsg_alloc();
+    if (!msg) {
+        fprintf(stderr, "failed to allocate netlink message\n");
+        return 2;
+    }
+// Here is the msg header for Get Interfaces:
+// genlmsg_put(msg, 0, 0, wifi.nl80211_id, 0,
+//             NLM_F_DUMP, NL80211_CMD_GET_INTERFACE, 0);
+// See: https://github.com/yurovsky/utils/blob/master/nl-genl/list-80211.c
+
+    genlmsg_put(msg, 0, 0, genl_family_get_id(state.nl80211), 0,
+            0, NL80211_CMD_SET_WIPHY, 0);
+// Tell base class to add:
+// devid, freq, htval are all type 'unsigned int':
+    NLA_PUT_U32(msg, NL80211_ATTR_IFINDEX, devid);
+    NLA_PUT_U32(msg, NL80211_ATTR_WIPHY_FREQ, freq);
+    NLA_PUT_U32(msg, NL80211_ATTR_WIPHY_CHANNEL_TYPE, htval);
+
+    nl_send_auto_complete(state.nl_sock,msg);
+// Base class will free, no message re-use!
+    nlmsg_free(msg);
+
+    dev->channel = channel;
+
+    return( 0 );
+ 
+}
