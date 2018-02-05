@@ -11,7 +11,8 @@ int Nl80211Base::list_interface_handler(struct nl_msg *msg, void *arg)
 {
 	nl80211CallbackInfo* info = (nl80211CallbackInfo *)arg;
 	// arg->m_pInstance == [this *]
-	
+	Nl80211Base* instance = info->m_pInstance;
+	instance->LogInfo("list_interface_handler() called");
 	return NL_SKIP;
 }
 
@@ -19,12 +20,24 @@ int Nl80211Base::finish_handler(struct nl_msg *msg, void *arg)
 {
 	nl80211CallbackInfo* info = (nl80211CallbackInfo *)arg;
 	info->status = 0;
+	Nl80211Base* instance = info->m_pInstance;
+	instance->LogInfo("finish_handler() called");
 	// Caller checks:
 	//   while (info.status > 0)
 	//   {
 	//       nl_recvmsgs(wifi.nls, cb);
 	//   }
 	return NL_SKIP;
+}
+
+bool Nl80211Base::FreeMessage()
+{
+	if (m_msg != nullptr)
+	{
+		nlmsg_free(m_msg);
+		m_msg = nullptr;
+	}
+	return true;
 }
 
 bool Nl80211Base::Close()
@@ -39,12 +52,7 @@ bool Nl80211Base::Close()
 		nl_cb_put(m_cb);
 		m_cb = nullptr;
 	}
-	if (m_msg != nullptr)
-	{
-		nlmsg_free(m_msg);
-		m_msg = nullptr;
-	}
-	return true;
+	return FreeMessage();
 }
 
 bool Nl80211Base::Open()
@@ -71,6 +79,12 @@ bool Nl80211Base::Open()
 		return false;
 	}
 
+	return true;
+}
+
+bool Nl80211Base::GetDeviceId(const char* ifaceName)
+{
+	m_deviceId = if_nametoindex(ifaceName);
 	return true;
 }
 
@@ -119,6 +133,18 @@ bool Nl80211Base::SetupMessage(int flags, uint8_t cmd)
 	return true;
 }
 
+// Add (unsigned) 32-bit parameter to the message.
+// Used, e.g., "NLA_PUT_U32(msg, NL80211_ATTR_IFINDEX, devid);" ==>
+//    "AddMessageParameterU32(NL80211_ATTR_IFINDEX, deviceId);"
+bool Nl80211Base::AddMessageParameterU32(enum nl80211_attrs parameterName, uint32 value)
+{
+	NLA_PUT_U32(m_msg, parameterName, value);
+	return true;
+nla_put_failure:
+	LogErr(AT, "Can't Add Parameter");
+	return false;
+}
+
 bool Nl80211Base::SendWithRepeatingResponses()
 {
 	nl_send_auto_complete(m_sock, m_msg);
@@ -132,6 +158,12 @@ bool Nl80211Base::SendWithRepeatingResponses()
 		nl_recvmsgs(m_sock, m_cb);
 	}
 	return true;
+}
+
+bool Nl80211Base::SendAndFreeMessage()
+{
+	nl_send_auto_complete(m_sock, m_msg);
+	return FreeMessage();
 }
 /***
  struct nl_sock *nls;

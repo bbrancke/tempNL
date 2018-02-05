@@ -1,6 +1,6 @@
 // main.cpp - test code.
 // To build:
-// g++ -g -std=c++11 -I /usr/include/libnl3/ main.cpp InterfaceManagerNl80211.cpp Nl80211Base.cpp Log.cpp -lnl-genl-3 -lnl-3 -o test
+// g++ -g -Wall -std=c++11 -I /usr/include/libnl3/ main.cpp InterfaceManagerNl80211.cpp ChannelSetterNl80211.cpp Nl80211Base.cpp Log.cpp -lnl-genl-3 -lnl-3 -o test
 //
 // "netlink/netlink.h: No such file or directory":
 // Had to install:
@@ -9,6 +9,7 @@
 //		sudo apt-get install libnl-genl-3-dev
 // and:  libnl-route-3-dev and libnfnetlink-dev
 // and: sudo apt-get install libnl-dev libnl1
+// WARNING: One of the without the '3' resets everything BACK!
 // FINALLY, it is compiling...
 // sudo apt-get install libnl-genl-3-dev
 /****

@@ -20,17 +20,20 @@
 // FOR NOW, only implementing the NL80211 version;
 //   older ShX versions still have WEXT (Wireless Extensions /
 //   IOCTLs) mixed in throughout.
+#ifndef IINTERFACEMANAGER_H_
+#define IINTERFACEMANAGER_H_
+
+#include <string>
 // Instantiate:
 // InterfaceManagerNl80211 im("InterfaceManagerNl80211");
 // ==> GetInstance(name);
 class IInterfaceManager
 {
 public:
-	static IInterfaceManager* GetInstance();
 	virtual bool GetInterfaceList() = 0;
-protected:
-	IInterfaceManager();
-	static IInterfaceManager* m_instance = nullptr;
+
 };
+
+#endif  // IINTERFACEMANAGER_H_
 
 

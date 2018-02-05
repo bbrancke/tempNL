@@ -26,7 +26,8 @@
 #include <string>
 // Instantiate:
 // InterfaceManagerNl80211 im("InterfaceManagerNl80211");
-// ==> GetInstance(name);
+// ==> GetInstance(name);  <= no longer include the name...
+// This is a Singleton class (implemented in the Concrete class)
 class IInterfaceManager
 {
 public:

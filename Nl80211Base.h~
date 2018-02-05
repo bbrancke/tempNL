@@ -17,6 +17,17 @@
 
 #include <linux/nl80211.h>
 
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+// if_nametoindex is defined in net/if.h but that conflicts with linux/if.h
+extern unsigned int if_nametoindex(const char *__ifname);
+#ifdef __cplusplus
+}
+#endif
+
 #include "Log.h"
 
 using namespace std;
@@ -47,20 +58,27 @@ public:
 	static int list_interface_handler(struct nl_msg *msg, void *arg);
 	
 	bool Close();
+	bool FreeMessage();
 	bool Open();
+	bool GetDeviceId(const char* ifaceName);
 	bool SetupCallback();
 	// flags: 0 or NLM_F_DUMP if repeating responses expected.
 	// cmd:  NL80211_CMD_GET_INTERFACE - get List of interfaces
 	//       NL80211_CMD_SET_WIPHY - set frequency
 	bool SetupMessage(int flags, uint8_t cmd);
+	bool AddMessageParameterU32(enum nl80211_attrs parameterName, uint32 value);
+	// Call this when expecting multiple responses [e.g., GetInterfaceList()]:
 	bool SendWithRepeatingResponses();
+	// Send with no mult [e.g., SetChannel()]
+	bool SendAndFreeMessage();
 protected:
 	Nl80211Base() { }
+	uint32_t m_deviceId;
 private:
 	struct nl_sock *m_sock = nullptr;
 	struct nl_msg *m_msg = nullptr;
 	struct nl_cb *m_cb = nullptr;
-	int m_nl80211Id;
+	int32_t m_nl80211Id;
 	nl80211CallbackInfo m_cbInfo;
 };
 
