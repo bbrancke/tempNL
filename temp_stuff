@@ -66,3 +66,8 @@ static int linux_set_channel_nl80211(struct wif *wi, int channel)
     return( 0 );
  
 }
+
+
+See:
+https://github.com/Robpol86/libnl/blob/master/example_c/show_wifi_interface.c
+example of get info (one interface and ALL interfaces)

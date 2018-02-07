@@ -43,6 +43,10 @@ static int linux_set_channel_nl80211(struct wif *wi, int channel)
 // Here is the msg header for Get Interfaces:
 // genlmsg_put(msg, 0, 0, wifi.nl80211_id, 0,
 //             NLM_F_DUMP, NL80211_CMD_GET_INTERFACE, 0);
+// There are two callbacks for this:
+//    static int finish_handler(struct nl_msg *msg, void *arg)
+// and:
+//    static int list_interface_handler(struct nl_msg *msg, void *arg)
 // See: https://github.com/yurovsky/utils/blob/master/nl-genl/list-80211.c
 
     genlmsg_put(msg, 0, 0, genl_family_get_id(state.nl80211), 0,
@@ -62,3 +66,8 @@ static int linux_set_channel_nl80211(struct wif *wi, int channel)
     return( 0 );
  
 }
+
+
+See:
+https://github.com/Robpol86/libnl/blob/master/example_c/show_wifi_interface.c
+example of get info

@@ -36,7 +36,22 @@ bool ChannelSetterNl80211::SetChannel(uint32_t channel)
 {
 	uint32_t freq = ChannelToFrequency(channel);
 	uint32_t htval = NL80211_CHAN_NO_HT;
-
+/***
+Shouldn't this use (newer):
+516: * @NL80211_CMD_SET_CHANNEL: Set the channel (using %NL80211_ATTR_WIPHY_FREQ
+ *	and the attributes determining channel width) the given interface
+ *	(identifed by %NL80211_ATTR_IFINDEX) shall operate on.
+160: * @NL80211_CMD_SET_WIPHY: set wiphy parameters, needs %NL80211_ATTR_WIPHY or
+ *	%NL80211_ATTR_IFINDEX; can be used to set %NL80211_ATTR_WIPHY_NAME,
+ *	%NL80211_ATTR_WIPHY_TXQ_PARAMS, %NL80211_ATTR_WIPHY_FREQ (and the
+ *	attributes determining the channel width; this is used for setting
+ *	monitor mode channel),  %NL80211_ATTR_WIPHY_RETRY_SHORT,
+ *	%NL80211_ATTR_WIPHY_RETRY_LONG, %NL80211_ATTR_WIPHY_FRAG_THRESHOLD,
+ *	and/or %NL80211_ATTR_WIPHY_RTS_THRESHOLD.
+ *	However, for setting the channel, see %NL80211_CMD_SET_CHANNEL  <=== THIS
+ *	instead, the support here is for backward compatibility only.
+See /usr/include/linux/nl80211.h
+****/
 	if (!SetupMessage(0, NL80211_CMD_SET_WIPHY))
 	{
 		return false;

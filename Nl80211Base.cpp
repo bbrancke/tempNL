@@ -70,8 +70,9 @@ bool Nl80211Base::Open()
 		Close();
 		return false;
 	}
-
-	m_nl80211Id = genl_ctrl_resolve(m_sock, "nl80211");
+// /usr/include/linux\nl80211.h:
+// #define NL80211_GENL_NAME "nl80211"
+	m_nl80211Id = genl_ctrl_resolve(m_sock, NL80211_GENL_NAME);
 	if (m_nl80211Id < 0)
 	{
 		LogErr(AT, "nl80211: Not found.");
