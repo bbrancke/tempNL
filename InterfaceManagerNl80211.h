@@ -14,7 +14,7 @@
 #include <netlink/genl/ctrl.h>
 ****/
 #include "Log.h"
-#include "Nl80211Base.h"
+#include "Nl80211InterfaceAdmin.h"
 #include "IInterfaceManager.h"
 /*********
 Use an Interface with Base class(es):
@@ -65,15 +65,18 @@ class BaseB : public Interface
 
 using namespace std;
 
-class InterfaceManagerNl80211 : public IInterfaceManager, public Nl80211Base
+class InterfaceManagerNl80211 : public IInterfaceManager, public Nl80211InterfaceAdmin
 {
 public:
 	static InterfaceManagerNl80211* GetInstance();
+	// Not copiable and not assignable:
+	InterfaceManagerNl80211(InterfaceManagerNl80211 const&) = delete;
+	InterfaceManagerNl80211& operator=(InterfaceManagerNl80211 const&) = delete;
 	virtual bool GetInterfaceList();
 private:
 	InterfaceManagerNl80211();  // Private so that it can  not be called
-	InterfaceManagerNl80211(InterfaceManagerNl80211 const&) {};  // copy constructor is private
-	InterfaceManagerNl80211& operator=(InterfaceManagerNl80211 const&){};  // assignment operator is private
+//	InterfaceManagerNl80211(InterfaceManagerNl80211 const&) {};  // copy constructor is private
+//	InterfaceManagerNl80211& operator=(InterfaceManagerNl80211 const&){};  // assignment operator is private
 	static InterfaceManagerNl80211* m_pInstance;
 };
 

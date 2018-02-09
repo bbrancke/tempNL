@@ -70,7 +70,7 @@ bool Nl80211Base::Open()
 		Close();
 		return false;
 	}
-// /usr/include/linux\nl80211.h:
+// /usr/include/linux\nl80211.h:30:
 // #define NL80211_GENL_NAME "nl80211"
 	m_nl80211Id = genl_ctrl_resolve(m_sock, NL80211_GENL_NAME);
 	if (m_nl80211Id < 0)

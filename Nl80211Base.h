@@ -15,18 +15,11 @@
 #include <netlink/genl/family.h>
 #include <netlink/genl/ctrl.h>
 
+#include "net/if.h"  // if_nametoindex (can __THROW); note: conflicts with linux/if.h
+
 #include <linux/nl80211.h>
 
 #include <stdint.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-// if_nametoindex is defined in net/if.h but that conflicts with linux/if.h
-extern unsigned int if_nametoindex(const char *__ifname);
-#ifdef __cplusplus
-}
-#endif
 
 #include "Log.h"
 

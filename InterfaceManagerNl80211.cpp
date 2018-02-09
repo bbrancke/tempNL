@@ -5,7 +5,7 @@
 // Global static pointer used to ensure a single instance of the class:
 InterfaceManagerNl80211* InterfaceManagerNl80211::m_pInstance = NULL; 
 
-InterfaceManagerNl80211::InterfaceManagerNl80211() : Nl80211Base("InterfaceManagerNl80211")
+InterfaceManagerNl80211::InterfaceManagerNl80211() : Nl80211InterfaceAdmin("InterfaceManagerNl80211")
 { }
 
 InterfaceManagerNl80211* InterfaceManagerNl80211::GetInstance()
@@ -54,3 +54,4 @@ bool InterfaceManagerNl80211::GetInterfaceList()
 	LogInfo("GetInterfaceList() complete, success");
 	return true;
 }
+

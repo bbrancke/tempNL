@@ -7,14 +7,14 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-
+/***
 #include <netlink/netlink.h>
 #include <netlink/genl/genl.h>
 #include <netlink/genl/family.h>
 #include <netlink/genl/ctrl.h>
-
+****/
 #include "Log.h"
-#include "Nl80211Base.h"
+#include "Nl80211InterfaceAdmin.h"
 #include "IInterfaceManager.h"
 /*********
 Use an Interface with Base class(es):
@@ -65,7 +65,7 @@ class BaseB : public Interface
 
 using namespace std;
 
-class InterfaceManagerNl80211 : public IInterfaceManager, public Nl80211Base
+class InterfaceManagerNl80211 : public IInterfaceManager, public Nl80211InterfaceAdmin
 {
 public:
 	static InterfaceManagerNl80211* GetInstance();

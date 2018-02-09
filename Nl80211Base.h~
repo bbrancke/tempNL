@@ -15,6 +15,8 @@
 #include <netlink/genl/family.h>
 #include <netlink/genl/ctrl.h>
 
+#include "net/if.h"  // if_nametoindex (can __THROW)
+
 #include <linux/nl80211.h>
 
 #include <stdint.h>
@@ -22,8 +24,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 // if_nametoindex is defined in net/if.h but that conflicts with linux/if.h
-extern unsigned int if_nametoindex(const char *__ifname);
+// extern unsigned int if_nametoindex(const char *__ifname);
+// defined in net.if.h as:
+// extern unsigned int if_nametoindex (const char *__ifname) __THROW;
+// -- can throw an exception in C++
 #ifdef __cplusplus
 }
 #endif
@@ -66,7 +72,7 @@ public:
 	// cmd:  NL80211_CMD_GET_INTERFACE - get List of interfaces
 	//       NL80211_CMD_SET_WIPHY - set frequency
 	bool SetupMessage(int flags, uint8_t cmd);
-	bool AddMessageParameterU32(enum nl80211_attrs parameterName, uint32 value);
+	bool AddMessageParameterU32(enum nl80211_attrs parameterName, uint32_t value);
 	// Call this when expecting multiple responses [e.g., GetInterfaceList()]:
 	bool SendWithRepeatingResponses();
 	// Send with no mult [e.g., SetChannel()]

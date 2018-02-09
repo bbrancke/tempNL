@@ -85,7 +85,23 @@ bool Nl80211Base::Open()
 
 bool Nl80211Base::GetDeviceId(const char* ifaceName)
 {
-	m_deviceId = if_nametoindex(ifaceName);
+	try
+	{
+		m_deviceId = if_nametoindex(ifaceName);
+	}
+	catch(...)
+	{
+		m_deviceId = 0;
+	}
+	if (m_deviceId == 0)
+	{
+		string s("Can't get Device Id for: [");
+		s += ifaceName;
+		s += "]";
+		LogErr(AT, s);
+		return false;
+	}
+	// else OK...
 	return true;
 }
 
