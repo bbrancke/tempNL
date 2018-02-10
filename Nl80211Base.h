@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <vector>
 
 // Use: "-I /usr/include/libnl3/"
 #include <netlink/socket.h>
@@ -21,6 +22,7 @@
 
 #include <stdint.h>
 
+#include "OneInterface.h"
 #include "Log.h"
 
 using namespace std;
@@ -64,9 +66,13 @@ public:
 	bool SendWithRepeatingResponses();
 	// Send with no mult [e.g., SetChannel()]
 	bool SendAndFreeMessage();
+	void ClearInterfaceList();
+	void AddInterface(uint32_t phyId, const char *interfaceName,
+		int macLength, const uint8_t *macAddress);
 protected:
 	Nl80211Base() { }
 	uint32_t m_deviceId;
+	vector<OneInterface *> m_interfaces;
 private:
 	struct nl_sock *m_sock = nullptr;
 	struct nl_msg *m_msg = nullptr;

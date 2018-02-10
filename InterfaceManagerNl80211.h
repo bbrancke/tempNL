@@ -14,6 +14,7 @@
 #include <netlink/genl/ctrl.h>
 ****/
 #include "Log.h"
+#include "OneInterface.h"
 #include "Nl80211InterfaceAdmin.h"
 #include "IInterfaceManager.h"
 /*********

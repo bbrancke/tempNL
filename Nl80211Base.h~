@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <vector>
 
 // Use: "-I /usr/include/libnl3/"
 #include <netlink/socket.h>
@@ -15,25 +16,13 @@
 #include <netlink/genl/family.h>
 #include <netlink/genl/ctrl.h>
 
-#include "net/if.h"  // if_nametoindex (can __THROW)
+#include "net/if.h"  // if_nametoindex (can __THROW); note: conflicts with linux/if.h
 
 #include <linux/nl80211.h>
 
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-// if_nametoindex is defined in net/if.h but that conflicts with linux/if.h
-// extern unsigned int if_nametoindex(const char *__ifname);
-// defined in net.if.h as:
-// extern unsigned int if_nametoindex (const char *__ifname) __THROW;
-// -- can throw an exception in C++
-#ifdef __cplusplus
-}
-#endif
-
+#include "OneInterface.h"
 #include "Log.h"
 
 using namespace std;
@@ -77,9 +66,12 @@ public:
 	bool SendWithRepeatingResponses();
 	// Send with no mult [e.g., SetChannel()]
 	bool SendAndFreeMessage();
+	void AddInterface(uint32_t phyId, const char *interfaceName,
+		int macLength, const uint8_t *macAddress);
 protected:
 	Nl80211Base() { }
 	uint32_t m_deviceId;
+	vector<OneInterface> m_interfaces;
 private:
 	struct nl_sock *m_sock = nullptr;
 	struct nl_msg *m_msg = nullptr;

@@ -9,10 +9,37 @@ Nl80211Base::Nl80211Base(const char* name) : Log(name)
 
 int Nl80211Base::list_interface_handler(struct nl_msg *msg, void *arg)
 {
-	nl80211CallbackInfo* info = (nl80211CallbackInfo *)arg;
-	// arg->m_pInstance == [this *]
-	Nl80211Base* instance = info->m_pInstance;
-	instance->LogInfo("list_interface_handler() called");
+	nl80211CallbackInfo* info;
+	Nl80211Base* instance;
+	struct genlmsghdr *gnlh;
+	struct nlattr *tb_msg[NL80211_ATTR_MAX + 1];
+
+	int len;
+	uint32_t phyId;
+	const char *interfaceName;
+	const uint8_t *macAddress;
+
+	info = (nl80211CallbackInfo *)arg;
+	instance = info->m_pInstance;  // arg->m_pInstance == [this *]
+
+	gnlh = (genlmsghdr *)nlmsg_data(nlmsg_hdr(msg));
+	// Parse 'msg' into the 'tb_msg' array:
+	nla_parse(tb_msg, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0), genlmsg_attrlen(gnlh, 0), NULL);
+	// Need these values to fill a new OneInterface:
+	if (tb_msg[NL80211_ATTR_IFNAME]
+		&& tb_msg[NL80211_ATTR_WIPHY]
+		&& tb_msg[NL80211_ATTR_MAC])
+	{
+		phyId = nla_get_u32(tb_msg[NL80211_ATTR_WIPHY]);
+		interfaceName = nla_get_string(tb_msg[NL80211_ATTR_IFNAME]);
+		len = nla_len(tb_msg[NL80211_ATTR_MAC]);
+		macAddress = (uint8_t *)nla_data(tb_msg[NL80211_ATTR_MAC]);
+		instance->AddInterface(phyId, interfaceName, len, macAddress);
+	}
+	else
+	{
+		instance->LogInfo("Nl80211: GET_INTERFACEs callback; MISSING iface param!");
+	}
 	return NL_SKIP;
 }
 
@@ -28,6 +55,27 @@ int Nl80211Base::finish_handler(struct nl_msg *msg, void *arg)
 	//       nl_recvmsgs(wifi.nls, cb);
 	//   }
 	return NL_SKIP;
+}
+
+void Nl80211Base::ClearInterfaceList()
+{
+	for (OneInterface *pI : m_interfaces)
+	{
+		delete pI;
+	}
+	m_interfaces.clear();
+	LogInfo("Nl80211: ClearInterfaceList()");
+}
+
+void Nl80211Base::AddInterface(uint32_t phyId, const char *interfaceName,
+		int macLength, const uint8_t *macAddress)
+{
+	string s("Nl80211: AddInterface [");
+	s += interfaceName;
+	s += "]";
+	LogInfo(s);
+	OneInterface *pI = new OneInterface(phyId, interfaceName, macAddress, macLength);
+	m_interfaces.push_back(pI);
 }
 
 bool Nl80211Base::FreeMessage()

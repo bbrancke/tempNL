@@ -69,11 +69,14 @@ class InterfaceManagerNl80211 : public IInterfaceManager, public Nl80211Interfac
 {
 public:
 	static InterfaceManagerNl80211* GetInstance();
+	// Not copiable and not assignable:
+	InterfaceManagerNl80211(InterfaceManagerNl80211 const&) = delete;
+	InterfaceManagerNl80211& operator=(InterfaceManagerNl80211 const&) = delete;
 	virtual bool GetInterfaceList();
 private:
 	InterfaceManagerNl80211();  // Private so that it can  not be called
-	InterfaceManagerNl80211(InterfaceManagerNl80211 const&) {};  // copy constructor is private
-	InterfaceManagerNl80211& operator=(InterfaceManagerNl80211 const&){};  // assignment operator is private
+//	InterfaceManagerNl80211(InterfaceManagerNl80211 const&) {};  // copy constructor is private
+//	InterfaceManagerNl80211& operator=(InterfaceManagerNl80211 const&){};  // assignment operator is private
 	static InterfaceManagerNl80211* m_pInstance;
 };
 
