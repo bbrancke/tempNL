@@ -4,7 +4,7 @@
 
 #include "ChannelSetterNl80211.h"
 
-ChannelSetterNl80211::ChannelSetterNl80211() : Nl80211Base("InterfaceManagerNl80211")
+ChannelSetterNl80211::ChannelSetterNl80211() : Nl80211Base("ChannelSetterNl80211")
 { }
 
 bool ChannelSetterNl80211::OpenConnection()
@@ -14,7 +14,7 @@ bool ChannelSetterNl80211::OpenConnection()
 		LogErr(AT, "Can't connect to NL80211.");
 		return false;
 	}
-	// TODO: Get Survey Interface Name from InterfaceManager:
+	// TODO: Get Survey Interface Name from InterfaceManager (const char *):
 	GetDeviceId("wlan0");
 	return true;
 }

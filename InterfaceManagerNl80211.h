@@ -19,30 +19,6 @@
 #include "IInterfaceManager.h"
 /*********
 Use an Interface with Base class(es):
-//
-// https://stackoverflow.com/questions/3686210/c-using-a-base-class-as-the-implementation-of-an-interface
-// I:
-class Interface {
-    public:
-        virtual void myfunction() = 0;
-};
-
-class Base {
-    public:
-        virtual void myfunction() {/ *...* /}
-};
-
-class Derived : public Interface, public Base {
-    public:
-        void myfunction() { Base::myfunction(); }  // forwarding call  <===
-};
-
-int main() {
-   Derived d;
-   d.myfunction();
-   return 0;
-}
-//
 // Or, II: We want to provide several base classes that implement the same interface.
 // The Interface class is the base of the other classes:
 
