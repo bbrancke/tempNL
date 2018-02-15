@@ -225,71 +225,40 @@ bool Nl80211Base::SendWithRepeatingResponses()
 	return true;
 }
 
+// SetChannel() and Create[/Delete]VirtualInterface() will
+//   call this method to Send m_msg to nl80211,
+//   checks for error returned from nl80211.
 bool Nl80211Base::SendAndFreeMessage()
 {
-	nl_send_auto_complete(m_sock, m_msg);
+	int rv;
+	// "nl_send_auto_complete: DEPRECATED, please use nl_send_auto()"
+	// int nl_send_auto(struct nl_sock *sk, struct nl_msg *msg)
+	// SAME parameters, returns # of bytes sent OR negative error code
+	//   nl_send_auto_complete(m_sock, m_msg);  DEPRECATED...
+	rv = nl_send_auto(m_sock, m_msg);
+	if (rv < 0)
+	{
+		rv = 0 - rv;  // ==> positive error #.
+		stringstream s;
+		s << "Nl80211Base::SendAndFreeMessage: send_auto FAILED: ";
+		s << strerror(rv);
+		LogErr(AT, s);
+		FreeMessage();
+		return false;
+	}
+	// Wait for ACK from nl80211:
+	rv = nl_wait_for_ack(m_sock);  // 0: Succcess, <0: Error (w/errno)
+	if (rv < 0)
+	{
+		rv = 0 - rv;  // ==> positive error #.
+		// e.g. Unknown Interface name (EINVAL); multitude of possibilities...
+		stringstream s;
+		s << "Nl80211Base::SendAndFreeMessage: wait_for_ack returned ERROR: ";
+		s << strerror(rv);
+		LogErr(AT, s);
+		FreeMessage();
+		return false;
+	}
 	return FreeMessage();
 }
-/***
- struct nl_sock *nls;
-        int nl80211_id;
-    } wifi;
 
-    wifi.nls = nl_socket_alloc();
-    if (!wifi.nls) {
-        fprintf(stderr, "Failed to allocate netlink socket.\n");
-        return EXIT_FAILURE;
-    }
-
-    int ret = EXIT_SUCCESS;
-
-    nl_socket_set_buffer_size(wifi.nls, 8192, 8192);
-
-    if (genl_connect(wifi.nls)) {
-        fprintf(stderr, "Failed to connect to generic netlink.\n");
-        ret = EXIT_FAILURE;
-        goto out_connect;
-    }
-
-    wifi.nl80211_id = genl_ctrl_resolve(wifi.nls, "nl80211");
-    if (wifi.nl80211_id < 0) {
-        fprintf(stderr, "nl80211 not found.\n");
-        ret = EXIT_FAILURE;
-        goto out_connect;
-    }
-
-    struct nl_msg *msg = nlmsg_alloc();
-    if (!msg) {
-        fprintf(stderr, "Failed to allocate netlink message.\n");
-        ret = EXIT_FAILURE;
-        goto out_connect;
-    }
-
-    struct nl_cb *cb = nl_cb_alloc(NL_CB_DEFAULT);
-    if (!cb) {
-        fprintf(stderr, "Failed to allocate netlink callback.\n");
-        ret = EXIT_FAILURE;
-        goto out_alloc;
-    }
-
-    nl_cb_set(cb, NL_CB_VALID, NL_CB_CUSTOM, list_interface_handler, NULL);
-
-    genlmsg_put(msg, 0, 0, wifi.nl80211_id, 0,
-            NLM_F_DUMP, NL80211_CMD_GET_INTERFACE, 0);
-
-    nl_send_auto_complete(wifi.nls, msg);
-
-    int err = 1;
-
-    nl_cb_set(cb, NL_CB_FINISH, NL_CB_CUSTOM, finish_handler, &err);
-
-    while (err > 0)
-        nl_recvmsgs(wifi.nls, cb);
-
-    nl_cb_put(cb);
-
-out_alloc:
-    nlmsg_free(msg);
-out_connect:
-nl_socket_free(wifi.nls);
-****/

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <cstring>  // std::strerror()
 #include <vector>
 
 // Use: "-I /usr/include/libnl3/"

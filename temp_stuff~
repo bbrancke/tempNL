@@ -200,7 +200,7 @@ nla_put_failure:
 ================================================================
 Also see:
 http://vlkan.com/wapi/wireless_8c_source.html
-see line 982. Also delete interface
+see line 982. Also delete interface.
 uses "nl_cb_err(cb, NL_CB_CUSTOM, nl80211_err_handler, &ret);"
 for err handler
 
