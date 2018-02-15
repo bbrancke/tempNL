@@ -1,0 +1,18 @@
+Notes:
+
+nl80211.h:180
+ * @NL80211_CMD_NEW_INTERFACE: Newly created virtual interface or response
+ *	to %NL80211_CMD_GET_INTERFACE. Has %NL80211_ATTR_IFINDEX,
+ *	%NL80211_ATTR_WIPHY and %NL80211_ATTR_IFTYPE attributes.
+ *
+ * Can also be sent from userspace to request creation of a new virtual interface,
+ *   then requires attributes %NL80211_ATTR_WIPHY, %NL80211_ATTR_IFTYPE and
+ *   %NL80211_ATTR_IFNAME.
+ *
+ * ====================================================================
+ *
+ * @NL80211_CMD_DEL_INTERFACE: Virtual interface was deleted, has attributes
+ *	%NL80211_ATTR_IFINDEX and %NL80211_ATTR_WIPHY. 
+ *
+ * Can also be sent from userspace to request deletion of a virtual interface,
+ *   then requires attribute %NL80211_ATTR_IFINDEX.

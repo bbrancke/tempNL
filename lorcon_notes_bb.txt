@@ -1,0 +1,129 @@
+;Error handling:
+nl80211_control.c:
+540:
+nl80211_get_chanlist(...)
+{
+...573:
+	err = 1;
+	nl_cb_set(cb, NL_CB_VALID, NL_CB_CUSTOM, nl80211_freqlist_cb, &cblock);
+	nl_cb_set(cb, NL_CB_FINISH, NL_CB_CUSTOM, nl80211_finish_cb, &err);
+	nl_cb_err(cb, NL_CB_CUSTOM, nl80211_error_cb, &err);  <=== HERE!! ===
+...
+	while (err)
+		nl_recvmsgs((struct nl_sock *) handle, cb);
+...
+}
+...
+// NOTE: Somethings kinda fucked here, err will set to a negative error number
+//   so the loop relies on NL_STOP rather than "while (err)" above.
+//   Our implemtation passes a (custom)struct * "nl80211CallbackInfo"
+//   for last param "(..., void *arg)"
+// so ADD errorNumber to the struct (set it to "0 - err->error"
+// in the error handler callback method as well as the 'status' (int) field
+//    in error_callback()
+Nl80211Base.cpp:213:
+SendWithRepeatingResponses() { ...
+Nl80211Base.cpp:166:	m_cbInfo.status = 1;
+Nl80211Base.cpp:220:	// finish_handler() method sets m_cbInfo->status to zero when complete.
+Nl80211Base.cpp:221:	while (m_cbInfo.status > 0) { add new channel via recv_msg() ... }
+
+
+...
+526:
+static int nl80211_error_cb(struct sockaddr_nl *nla, struct nlmsgerr *err,
+			 void *arg) {
+	int *ret = (int *) arg;
+	*ret = err->error;
+	return NL_STOP;
+}
+
+struct nlmsgerr {
+	int error;  // Negative errno or 0 for acknowledgements
+	struct nlmsghdr msg;  // Message header that caused the error
+};
+===========================================================================
+drv_mac80211.c:196:
+int mac80211_setmac_cb(lorcon_t *context, int mac_len, uint8_t *mac) {
+    IF DOWN  (ioctl) [ifconfig_ifupdown]
+    ifconfig_set_hwaddr(context->vapname, context->errstr, mac)
+    IF_UP (ioctl) [ifconfig_ifupdown]
+(FYI: There is also: context->setmac_cb = madwifing_setmac_cb;)
+
+ifcontrol_linux.c:232
+int ifconfig_ifupdown(const char *in_dev, char *errstr, int devup)
+	get flags (:92, uses SIOCGIFFLAGS)  <== by interface name
+	flags |= / &= ...
+	setflags (:62, SIOCSIFFLAGS)  <== by interface name
+===========================================================================
+SET CHANNEL:
+drv_mac80211.c:158:
+int mac80211_setchan_cb(lorcon_t *context, int channel) {
+	struct mac80211_lorcon *extras = (struct mac80211_lorcon *) context->auxptr;
+
+	if (nl80211_setchannel_cache(context->vapname, extras->nlhandle, extras->nlfamily,
+								 channel, 0, context->errstr) < 0) {
+		return -1;
+	}
+
+	return 0;
+}
+
+nl80211_control.c:353:
+int nl80211_setchannel_cache(const char *interface, void *handle, ...)
+{
+// assumes already connected, s0ck valid...
+	nlmsg_alloc() + err check...
+
+	genlmsg_put(msg, 0, 0, genl_family_get_id(nl80211), 0, 0, 
+				NL80211_CMD_SET_WIPHY, 0);
+	NLA_PUT_U32(msg, NL80211_ATTR_IFINDEX, if_nametoindex(interface));
+	NLA_PUT_U32(msg, NL80211_ATTR_WIPHY_FREQ, ChanToFreq(channel));
+	NLA_PUT_U32(msg, NL80211_ATTR_WIPHY_CHANNEL_TYPE, chanmode[chmode]);
+// 1. nl_send_auto_complete() SUCCESS + 2. nl_wait_for_ack() 
+// wait_for_ack: 0 == success, <0 == ERROR
+//
+// nl_send_auto_complete: DEPRECATED, please use nl_send_auto()
+// int nl_send_auto(struct nl_sock *sk, struct nl_msg *msg)
+// SAME parameters, returns # of bytes sent OR negative error code.
+	if ((ret = nl_send_auto_complete(nl_handle, msg)) >= 0) {
+		if ((ret = nl_wait_for_ack(nl_handle)) < 0) 
+			goto nla_put_failure;
+	}
+// Never uses ret; returns -1 on failure...
+	nlmsg_free(msg);
+============================================================================
+randomize MAC addr:
+lorcon_forge,c:62:
+void lcpf_randmac(uint8_t *addr, int valid)
+	if (valid) { pick a random OUI from the list, set addr[0->2} }
+	else { addr[0, 1, 2] = rand() % 255; }
+	addr[3] = rand() % 255;    	addr[4] = rand() % 255;    addr[5] = rand() % 255;
+	
+#include <cstdlib>
+...
+srand (time(NULL));  // Initialize random seed
+...
+// generate secret number between 1 and 10: (rand() returns [0, INTMAX)
+int iSecret = rand() % 10 + 1;
+============================================================================
+Create Virtual Interface (monitor mode)
+nl80211_control.c:202
+int nl80211_createvap(const char *interface, const char *newinterface, char *errstr)
+{ 
+
+uses the same [1]
+nl_send_auto_complete(nl_handle, msg) < 0 || nl_wait_for_ack(nl_handle) < 0
+scheme as set channel. [no cb_err set...]
+=================================================
+set_channel_cache use:
+[1]
+if ((ret = nl_send_auto_complete(nl_handle, msg)) >= 0) {
+		if ((ret = nl_wait_for_ack(nl_handle)) < 0) 
+			goto nla_put_failure;
+	}
+=================================================
+[1] This is now implemented in Nl80211Base::SendAndFreeMessage()
+
+
+
+
