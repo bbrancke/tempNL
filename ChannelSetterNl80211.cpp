@@ -15,7 +15,7 @@ bool ChannelSetterNl80211::OpenConnection()
 		return false;
 	}
 	// TODO: Get Survey Interface Name from InterfaceManager (const char *):
-	GetDeviceId("wlan0");
+	GetInterfaceIndex("wlan0", m_interfaceIndex);
 	return true;
 }
 

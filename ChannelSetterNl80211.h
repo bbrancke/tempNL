@@ -25,6 +25,7 @@ public:
 	virtual ~ChannelSetterNl80211();
 private:
 	uint32_t ChannelToFrequency(uint32_t channel);
+	uint32_t m_interfaceIndex;
 };
 
 #endif  // CHANNELSETTERNL80211_H_
