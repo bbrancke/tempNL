@@ -202,7 +202,125 @@ Also see:
 http://vlkan.com/wapi/wireless_8c_source.html
 see line 982. Also delete interface.
 uses "nl_cb_err(cb, NL_CB_CUSTOM, nl80211_err_handler, &ret);"
-for err handler
+=== NEW:./wapi/wapi-0.1/src/wireless.c: (guts):916:
+    static int nl80211_cmd_handler(const wapi_nl80211_ctx_t *ctx) { ... }
+    1018: ...
+    /* Configure callback handlers. */
+	nl_cb_err(cb, NL_CB_CUSTOM, nl80211_err_handler, &ret);
+	nl_cb_set(cb, NL_CB_FINISH, NL_CB_CUSTOM, nl80211_fin_handler, &ret);
+	nl_cb_set(cb, NL_CB_ACK, NL_CB_CUSTOM, nl80211_ack_handler, &ret);
 
+	/* Consume netlink replies. */
+	for (ret = 1; ret > 0; ) nl_recvmsgs(sock, cb);
+	if (ret) WAPI_ERROR("nl_recvmsgs() failed!\n");
+	...
+============================================================
+where: (888:)
+static int nl80211_err_handler(struct sockaddr_nl *nla, struct nlmsgerr *err, void *arg)
+{          |=================|  <=== HERE
+	int *ret = arg;
+	*ret = err->error;
+	return NL_STOP;
+}
+
+static int nl80211_fin_handler(struct nl_msg *msg, void *arg)
+{          |=================|  <=== HERE
+	int *ret = arg;
+	*ret = 0;
+	return NL_SKIP;
+}
+
+static int nl80211_ack_handler(struct nl_msg *msg, void *arg)
+{          |=================|  <=== HERE 
+	int *ret = arg;
+	*ret = 0;
+	return NL_STOP;
+}
+// we have: static int finish_handler(struct nl_msg *msg, void *arg);
+//     and: ... list_interface_handler() -- called:
+//     nl_cb_set(m_cb, NL_CB_VALID, NL_CB_CUSTOM, list_interface_handler, &m_cbInfo);
+// and:
+//     nl_cb_set(m_cb, NL_CB_FINISH, NL_CB_CUSTOM, finish_handler, &m_cbInfo);
+// FOR REPEATING RESPONSES
+// LETS ADD ACK_HANDLER and ERR_HANDLER for *repeating* responses.
+// For Create / Delete Interface, use the (simpler)
+//            **"SendAndFreeMessage()"**
+//    [uses nl_send_auto() [with err check if NOT SENT]
+//      and nl_wait_for_ack() [with err check if cmd FAILED]
+// static int error_handler(struct sockaddr_nl *nla, struct nlmsgerr *err, void *arg);
+// static int ack_handler(struct nl_msg *msg, void *arg);
+============================================================
+and:
+1042: (public) int wapi_if_add(int sock, const char *ifname, const char *name, wapi_mode_t mode) { ... }
+1053: (public) int wapi_if_del(int sock, const char *ifname) { ... }
+   -- these call into nl80211_cmd_handler(...)
 ================================================================
 ================================================================
+This is old, original get_interfaces (can't remember source)
+  removed from Nl80211Base.cpp
+This should have Error callback in here too.
+-- nl_cb_set(cb, NL_CB_VALID, NL_CB_CUSTOM, list_interface_handler, NULL);
+there is nl_cb_err(... error_handler, ...)  [See vlkan, above]
+/***
+ struct nl_sock *nls;
+        int nl80211_id;
+    } wifi;
+
+    wifi.nls = nl_socket_alloc();
+    if (!wifi.nls) {
+        fprintf(stderr, "Failed to allocate netlink socket.\n");
+        return EXIT_FAILURE;
+    }
+
+    int ret = EXIT_SUCCESS;
+
+    nl_socket_set_buffer_size(wifi.nls, 8192, 8192);
+
+    if (genl_connect(wifi.nls)) {
+        fprintf(stderr, "Failed to connect to generic netlink.\n");
+        ret = EXIT_FAILURE;
+        goto out_connect;
+    }
+
+    wifi.nl80211_id = genl_ctrl_resolve(wifi.nls, "nl80211");
+    if (wifi.nl80211_id < 0) {
+        fprintf(stderr, "nl80211 not found.\n");
+        ret = EXIT_FAILURE;
+        goto out_connect;
+    }
+
+    struct nl_msg *msg = nlmsg_alloc();
+    if (!msg) {
+        fprintf(stderr, "Failed to allocate netlink message.\n");
+        ret = EXIT_FAILURE;
+        goto out_connect;
+    }
+
+    struct nl_cb *cb = nl_cb_alloc(NL_CB_DEFAULT);
+    if (!cb) {
+        fprintf(stderr, "Failed to allocate netlink callback.\n");
+        ret = EXIT_FAILURE;
+        goto out_alloc;
+    }
+
+    nl_cb_set(cb, NL_CB_VALID, NL_CB_CUSTOM, list_interface_handler, NULL);
+
+    genlmsg_put(msg, 0, 0, wifi.nl80211_id, 0,
+            NLM_F_DUMP, NL80211_CMD_GET_INTERFACE, 0);
+
+    nl_send_auto_complete(wifi.nls, msg);
+
+    int err = 1;
+
+    nl_cb_set(cb, NL_CB_FINISH, NL_CB_CUSTOM, finish_handler, &err);
+
+    while (err > 0)
+        nl_recvmsgs(wifi.nls, cb);
+
+    nl_cb_put(cb);
+
+out_alloc:
+    nlmsg_free(msg);
+out_connect:
+nl_socket_free(wifi.nls);
+****/

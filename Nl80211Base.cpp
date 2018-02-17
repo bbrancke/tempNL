@@ -45,6 +45,7 @@ int Nl80211Base::list_interface_handler(struct nl_msg *msg, void *arg)
 
 int Nl80211Base::finish_handler(struct nl_msg *msg, void *arg)
 {
+	// (static)
 	nl80211CallbackInfo* info = (nl80211CallbackInfo *)arg;
 	info->status = 0;
 	Nl80211Base* instance = info->m_pInstance;
@@ -55,6 +56,30 @@ int Nl80211Base::finish_handler(struct nl_msg *msg, void *arg)
 	//       nl_recvmsgs(wifi.nls, cb);
 	//   }
 	return NL_SKIP;
+}
+
+int Nl80211Base::error_handler(struct sockaddr_nl *nla, struct nlmsgerr *err, void *arg)
+{
+	// (static)
+	// An error occurred, set arg->errcode to (0 - err->error [a NEGATIVE int])
+	nl80211CallbackInfo* info = (nl80211CallbackInfo *)arg;
+	Nl80211Base* instance = info->m_pInstance;
+	instance->LogInfo("error_handler() called");
+	info->status = 0;
+	info->errcode = (0 - err->error);  // convert to positive errno (for sterror(), etc)
+
+	return NL_STOP;
+}
+
+int Nl80211Base::ack_handler(struct nl_msg *msg, void *arg)
+{
+	// (static). Complete.
+	nl80211CallbackInfo* info = (nl80211CallbackInfo *)arg;
+	Nl80211Base* instance = info->m_pInstance;
+	instance->LogInfo("ack_handler() called");
+	info->status = 0;
+
+	return NL_STOP;
 }
 
 void Nl80211Base::ClearInterfaceList()
@@ -164,6 +189,7 @@ bool Nl80211Base::SetupCallback()
 
 	m_cbInfo.m_pInstance = this;
 	m_cbInfo.status = 1;
+	m_cbInfo.errcode = 0;
 
 	nl_cb_set(m_cb, NL_CB_VALID, NL_CB_CUSTOM, list_interface_handler, &m_cbInfo);
 	return true;
@@ -217,11 +243,23 @@ bool Nl80211Base::SendWithRepeatingResponses()
 	// m_cb (an nl_cb *) can hold > 1 callback, calls finish_handler()
 	//   when FINISHed, and list_interface_handler() foreach interface
 	nl_cb_set(m_cb, NL_CB_FINISH, NL_CB_CUSTOM, finish_handler, &m_cbInfo);
+	nl_cb_err(cb, NL_CB_CUSTOM, error_handler, &ret);
+	nl_cb_set(cb, NL_CB_ACK, NL_CB_CUSTOM, ack_handler, &ret);
 	// finish_handler() method sets m_cbInfo->status to zero when complete.
+	// [So does error_handler() and ack_handler()}
 	while (m_cbInfo.status > 0)
 	{
 		nl_recvmsgs(m_sock, m_cb);
 	}
+	if (m_cbInfo.errcode != 0)
+	{
+		// error_handler() was called!
+		string s("Nl80211:SendWithRepeatingResp() ERROR: ");
+		s += strerror(m_cbInfo.errcode);
+		LogErr(AT, s);
+		return false;
+	}
+	// else OK:
 	return true;
 }
 
