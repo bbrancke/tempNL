@@ -39,7 +39,7 @@ bool InterfaceManagerNl80211::GetInterfaceList()
 	if (!SetupMessage(NLM_F_DUMP, NL80211_CMD_GET_INTERFACE))
 	{
 		Close();
-		LogErr(AT, "Nl80211 SetupMessagw failed.");
+		LogErr(AT, "Nl80211 SetupMessage failed.");
 		return false;
 	}
 	// Call this when expecting multiple responses [e.g., GetInterfaceList()]:

@@ -1,0 +1,8 @@
+# vmlinux can be opened in gdb (must untar it first)
+# and you can find where something (bad) happened.
+# 1. untar the file '/boot/xxx'
+# 2. gdb vmlinux-3.18.21-custom
+# 3. (gdb) list *( bq24190_probe+0x2e4)
+#    [3. returns module (.c file name) and line number].
+#
+
