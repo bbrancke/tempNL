@@ -7,6 +7,44 @@
 
 Nl80211InterfaceAdmin::Nl80211InterfaceAdmin(const char *name) : Nl80211Base(name) { }
 
+bool Nl80211InterfaceAdmin::GetInterfaceList()
+{
+	LogInfo("Get InterfaceList() entry.");
+
+	if (!Open())
+	{
+		Close();
+		LogErr(AT, "Nl80211 open failed.");
+		return false;
+	}
+	if (!SetupCallback())
+	{
+		Close();
+		LogErr(AT, "Nl80211 SetupCallback failed.");
+		return false;
+	}
+	// flags: 0 or NLM_F_DUMP if repeating responses expected.
+	// cmd:  NL80211_CMD_GET_INTERFACE - get List of interfaces
+	//       NL80211_CMD_SET_WIPHY - set frequency
+	if (!SetupMessage(NLM_F_DUMP, NL80211_CMD_GET_INTERFACE))
+	{
+		Close();
+		LogErr(AT, "Nl80211 SetupMessage failed.");
+		return false;
+	}
+	// Call this when expecting multiple responses [e.g., GetInterfaceList()]:
+	if (!SendWithRepeatingResponses())
+	{
+		Close();
+		LogErr(AT, "Nl80211 SendWithRepeatingResponses failed.");
+		return false;
+	}
+	// All done, close everything:
+	Close();
+	LogInfo("GetInterfaceList() complete, success");
+	return true;
+}
+
 bool Nl80211InterfaceAdmin::SetMacAddress(const char *ifaceName, const uint8_t *mac)
 {
 	int fd;

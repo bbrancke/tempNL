@@ -25,7 +25,9 @@ class Nl80211InterfaceAdmin : public Nl80211Base
 {
 public:
 	Nl80211InterfaceAdmin(const char *name);
+protected:
 	bool SetMacAddress(const char *ifaceName, const uint8_t *mac);
+	bool GetInterfaceList();
 };
 
 #endif  // NL80211INTERFACEADMIN_H_

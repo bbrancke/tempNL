@@ -10,7 +10,6 @@ Nl80211InterfaceAdmin::Nl80211InterfaceAdmin(const char *name) : Nl80211Base(nam
 bool Nl80211InterfaceAdmin::SetMacAddress(const char *ifaceName, const uint8_t *mac)
 {
 	int fd;
-	int i;
 	struct ifreq dev;
 
 	fd = socket (AF_INET, SOCK_DGRAM, 0);
@@ -27,10 +26,6 @@ bool Nl80211InterfaceAdmin::SetMacAddress(const char *ifaceName, const uint8_t *
 	memcpy(&dev.ifr_hwaddr.sa_data, mac, 6);
 	snprintf(dev.ifr_name, IFNAMSIZ, "%s", ifaceName);
 	dev.ifr_hwaddr.sa_family = AF_INET;
-	for (i = 0; i < 6; i++)
-	{
-		dev.ifr_hwaddr.sa_data[i] = mac[i];
-	}
 
 	if (ioctl(fd, SIOCSIFHWADDR, &dev) < 0)
 	{

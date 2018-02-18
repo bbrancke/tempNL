@@ -7,53 +7,30 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-/***
-#include <netlink/netlink.h>
-#include <netlink/genl/genl.h>
-#include <netlink/genl/family.h>
-#include <netlink/genl/ctrl.h>
-****/
+
 #include "Log.h"
 #include "OneInterface.h"
 #include "Nl80211InterfaceAdmin.h"
-#include "IInterfaceManager.h"
-/*********
-Use an Interface with Base class(es):
-// Or, II: We want to provide several base classes that implement the same interface.
-// The Interface class is the base of the other classes:
 
-// in this order:
-class Interface  <== IInterfaceManager
-{
-    virtual void myfunction() = 0;
-}
-
-// "Concrete" implementation - InterfaceManagerNl80211 class:
-class BaseA : public Interface
-{   
-    // here "virtual" is optional as if the parent is virtual, the child is virtual too
-    virtual void myfunction() {/ *...* /}; // BaseA specific implementation
-}
-class BaseB : public Interface
-{
-    virtual void myfunction() {/ *...* /}; // BaseB specific implementation
-}
-**********/
+// This is no longer based upon Interface Manager Interface.
+// The Interface class was mostly empty, and the whole idea
+// of ShadowX parts (main(), etc) being "isolated" from the
+// actual implentation of wifi manipulaton started
+// to make less sense
+//  #include "IInterfaceManager.h"  no longer
 
 using namespace std;
 
-class InterfaceManagerNl80211 : public IInterfaceManager, public Nl80211InterfaceAdmin
+class InterfaceManagerNl80211 : public Nl80211InterfaceAdmin
 {
 public:
 	static InterfaceManagerNl80211* GetInstance();
 	// Not copiable and not assignable:
 	InterfaceManagerNl80211(InterfaceManagerNl80211 const&) = delete;
 	InterfaceManagerNl80211& operator=(InterfaceManagerNl80211 const&) = delete;
-	virtual bool GetInterfaceList();
+
 private:
-	InterfaceManagerNl80211();  // Private so that it can  not be called
-//	InterfaceManagerNl80211(InterfaceManagerNl80211 const&) {};  // copy constructor is private
-//	InterfaceManagerNl80211& operator=(InterfaceManagerNl80211 const&){};  // assignment operator is private
+	InterfaceManagerNl80211();  // Private so that ctor can't be called
 	static InterfaceManagerNl80211* m_pInstance;
 };
 
