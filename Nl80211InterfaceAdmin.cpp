@@ -1,7 +1,6 @@
 // Nl80211InterfaceAdmin.cpp
 // Includes convenience "translator" funcs between InterfaceManagerNl80211
-// class and Nl80211Base class, as well as Interface IOCTLs not provided
-// by NL80211 API (e.g., SetMacAddress). [At least, I don't see how...]
+// class and Nl80211Base class.
 
 #include "Nl80211InterfaceAdmin.h"
 
@@ -45,37 +44,129 @@ bool Nl80211InterfaceAdmin::GetInterfaceList()
 	return true;
 }
 
-bool Nl80211InterfaceAdmin::SetMacAddress(const char *ifaceName, const uint8_t *mac)
+// _createInterface(): private:
+bool Nl80211InterfaceAdmin::_createInterface(const char *newInterfaceName, 
+	uint32_t phyId, enum nl80211_iftype type)
 {
-	int fd;
-	struct ifreq dev;
-
-	fd = socket (AF_INET, SOCK_DGRAM, 0);
-	if (fd < 0)
+	// "NL80211_CMD_NEW_INTERFACE: ... sent from userspace to request
+	// creation of a new virtual interface, requires attributes:
+	// NL80211_ATTR_WIPHY, NL80211_ATTR_IFTYPE and NL80211_ATTR_IFNAME."
+	// ATTR_WIPHY is also known as 'phyId' in Nl80211Base
+	// or OneInterface->phy (type: uint32_t). Its the physical Device Id.
+	// Usually Phy #0 is the built-in TI chip, Phy #1 is USB radio.
+	if (!Open())
 	{
-		int myErr = errno;
-		string s("SetMacAddress: Can't get socket: ");
-		s += strerror(myErr);
+		LogErr(AT, "_createInterface(): Can't connect to NL80211.");
+		return false;
+	}
+
+	if (!SetupMessage(0, NL80211_CMD_NEW_INTERFACE))
+	{
+		Close();
+		LogErr(AT, "_createInterface(): SetupMessage failed.");
+		return false;
+	}
+
+	if (!AddMessageParameterU32(NL80211_ATTR_WIPHY, phyId)
+		|| !AddMessageParameterString(NL80211_ATTR_IFNAME, newInterfaceName)
+		|| !AddMessageParameterU32(NL80211_ATTR_IFTYPE, type))
+	{
+		Close();
+		// Detailed error already logged...
+		LogErr(AT, "_createInterface(): AddParam() failed.");
+		return false;
+	}
+
+	if (!SendAndFreeMessage())
+	{
+		Close();
+		// Detailed error already logged...
+		LogErr(AT, "_createInterface(): Send...() failed.");
+		return false;
+	}
+
+	Close();
+	LogInfo("_createInterface() complete, success");
+
+	return true;
+}
+
+// enum nl80211_iftype (of interest to us) are:
+//   NL80211_IFTYPE_STATION,
+//   NL80211_IFTYPE_AP,
+//   NL80211_IFTYPE_MONITOR
+// See: linux/nl80211.h
+
+// Create [AP / STA / MON] Interface(): public
+// example newInterfaceName: "ap0" - is 'interface' in hostapd.conf "interface=ap0"
+bool Nl80211InterfaceAdmin::CreateApInterface(const char *newInterfaceName,
+	uint32_t phyId)
+{
+	// '__ap' in "iw dev interface add xyz0 type __ap"
+	// maps to type enum nl80211_iftype::NL80211_IFTYPE_AP
+	return _createInterface(newInterfaceName, phyId, NL80211_IFTYPE_AP);
+}
+
+// example newInterfaceName: "sta0" - for wpa_supplicant (Alert e-mails on built-in TI chip)
+bool Nl80211InterfaceAdmin::CreateStationInterface(const char *newInterfaceName,
+	uint32_t phyId)
+{
+	return _createInterface(newInterfaceName, phyId, NL80211_IFTYPE_STATION);
+}
+
+// example newInterfaceName: "mon0" for Realtek USB radio (survey)
+bool Nl80211InterfaceAdmin::CreateMonitorInterface(const char *newInterfaceName,
+	uint32_t phyId)
+{
+	return _createInterface(newInterfaceName, phyId, NL80211_IFTYPE_MONITOR);
+}
+
+bool Nl80211InterfaceAdmin::DeleteInterface(const char *interfaceName)
+{
+	unsigned int ifIndex;
+	
+	ifIndex = if_nametoindex(interfaceName);
+	if (ifIndex == 0)
+	{
+		string s("DeleteInterface(): Can't get if index for interface: [");
+		s += interfaceName;
+		s += "]";
 		LogErr(AT, s);
 		return false;
 	}
 
-	memset(&dev, 0, sizeof(struct ifreq));
-	memcpy(&dev.ifr_hwaddr.sa_data, mac, 6);
-	snprintf(dev.ifr_name, IFNAMSIZ, "%s", ifaceName);
-	dev.ifr_hwaddr.sa_family = AF_INET;
-
-	if (ioctl(fd, SIOCSIFHWADDR, &dev) < 0)
+	if (!Open())
 	{
-		int myErr = errno;
-		close(fd);
-		string s("SetMacAddress: Can't set SIOCSIHWADDR: ");
-		s += strerror(myErr);
-		LogErr(AT, s);
+		LogErr(AT, "DeleteInterface(): Can't connect to NL80211.");
 		return false;
 	}
-	// else OK...
-	close(fd);
+
+	if (!SetupMessage(0, NL80211_CMD_DEL_INTERFACE))
+	{
+		Close();
+		LogErr(AT, "DeleteInterface(): SetupMessage failed.");
+		return false;
+	}
+// NLA_PUT_U32(msg, NL80211_ATTR_IFINDEX, ifidx);
+	if (!AddMessageParameterU32(NL80211_ATTR_IFINDEX, ifIndex))
+	{
+		Close();
+		// Detailed error already logged...
+		LogErr(AT, "DeleteInterface(): AddParam() failed.");
+		return false;
+	}
+
+	if (!SendAndFreeMessage())
+	{
+		Close();
+		// Detailed error already logged...
+		LogErr(AT, "DeleteInterface(): Send...() failed.");
+		return false;
+	}
+
+	Close();
+	LogInfo("DeleteInterface() complete, success");
+
 	return true;
 }
 

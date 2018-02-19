@@ -214,6 +214,10 @@ uses "nl_cb_err(cb, NL_CB_CUSTOM, nl80211_err_handler, &ret);"
 	for (ret = 1; ret > 0; ) nl_recvmsgs(sock, cb);
 	if (ret) WAPI_ERROR("nl_recvmsgs() failed!\n");
 	...
+NOTE THAT NL_AUTO_PID and NL_AUTO_SEQ in:
+		genlmsg_put(
+			msg, NL_AUTO_PID, NL_AUTO_SEQ ...)
+are BOTH ZERO
 ============================================================
 where: (888:)
 static int nl80211_err_handler(struct sockaddr_nl *nla, struct nlmsgerr *err, void *arg)

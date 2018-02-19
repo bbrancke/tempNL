@@ -249,6 +249,10 @@ static int nl80211_ack_handler(struct nl_msg *msg, void *arg)
 //      and nl_wait_for_ack() [with err check if cmd FAILED]
 // static int error_handler(struct sockaddr_nl *nla, struct nlmsgerr *err, void *arg);
 // static int ack_handler(struct nl_msg *msg, void *arg);
+TODO implement interface add/delete in NlInterfaceAdmin
+private generic add w/type param, public AddAp, AppMon, DeleteInterface
+See wireless.c in this top folder...
+
 ============================================================
 and:
 1042: (public) int wapi_if_add(int sock, const char *ifname, const char *name, wapi_mode_t mode) { ... }

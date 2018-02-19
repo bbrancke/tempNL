@@ -218,6 +218,9 @@ bool Nl80211Base::SetupMessage(int flags, uint8_t cmd)
  	// Get list of interfaces:
 	//genlmsg_put(m_msg, 0, 0, m_nl80211Id, 0,
 	//	NLM_F_DUMP, NL80211_CMD_GET_INTERFACE, 0);
+	// Note: params 2 and 3 (0, 0) are
+	// NL_AUTO_PID and NL_AUTO_SEQ, which are both defined as zero
+	// For use with nl_send_auto(...) [ My: SendAndFreeMessage() ]
 
 	genlmsg_put(m_msg, 0, 0, m_nl80211Id, 0, flags, cmd, 0);
 	
@@ -236,9 +239,20 @@ nla_put_failure:
 	return false;
 }
 
+bool Nl80211Base::AddMessageParameterString(enum nl80211_attrs parameterName, const char *value)
+{
+	NLA_PUT_STRING(m_msg, parameterName, value);
+	return true;
+nla_put_failure:
+	LogErr(AT, "Can't Add Parameter");
+	return false;
+}
+
 bool Nl80211Base::SendWithRepeatingResponses()
 {
-	nl_send_auto_complete(m_sock, m_msg);
+	// "nl_send_auto_complete: DEPRECATED, please use nl_send_auto()"
+//	nl_send_auto_complete(m_sock, m_msg);
+	nl_send_auto(m_sock, m_msg);
 	// m_cbInfo.status = 1;
 	// m_cb (an nl_cb *) can hold > 1 callback, calls finish_handler()
 	//   when FINISHed, and list_interface_handler() foreach interface

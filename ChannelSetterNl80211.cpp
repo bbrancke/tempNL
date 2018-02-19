@@ -9,13 +9,19 @@ ChannelSetterNl80211::ChannelSetterNl80211() : Nl80211Base("ChannelSetterNl80211
 
 bool ChannelSetterNl80211::OpenConnection()
 {
+	InterfaceManagerNl80211 *im;
+	const char *interfaceName;
 	if (!Open())
 	{
 		LogErr(AT, "Can't connect to NL80211.");
 		return false;
 	}
-	// TODO: Get Survey Interface Name from InterfaceManager (const char *):
-	GetInterfaceIndex("wlan0", m_interfaceIndex);
+	im = InterfaceManagerNl80211::GetInstance();
+	// Get Survey Interface Name from InterfaceManager (const char *):
+	// Currently this ALWAYS "mon0" but this may change if re-creating
+	// a troubled iface name does not succeed.
+	interfaceName = im->GetMonitorInterfaceName();
+	GetInterfaceIndex(interfaceName, m_interfaceIndex);
 	return true;
 }
 
@@ -64,10 +70,10 @@ See /usr/include/linux/nl80211.h
 		!AddMessageParameterU32(NL80211_ATTR_WIPHY_FREQ, freq)
 		||
 		!AddMessageParameterU32(NL80211_ATTR_WIPHY_CHANNEL_TYPE, htval))
-		{
-			LogErr(AT, "SetChannel() aborted, AddParam() failed.");
-			return false;
-		}
+	{
+		LogErr(AT, "SetChannel() aborted, AddParam() failed.");
+		return false;
+	}
 
 	return SendAndFreeMessage();
 }

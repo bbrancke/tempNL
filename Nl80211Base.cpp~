@@ -218,6 +218,9 @@ bool Nl80211Base::SetupMessage(int flags, uint8_t cmd)
  	// Get list of interfaces:
 	//genlmsg_put(m_msg, 0, 0, m_nl80211Id, 0,
 	//	NLM_F_DUMP, NL80211_CMD_GET_INTERFACE, 0);
+	// Note: params 2 and 3 (0, 0) are
+	// NL_AUTO_PID and NL_AUTO_SEQ, which are both defined as zero
+	// For use with nl_send_auto(...) [ My: SendAndFreeMessage() ]
 
 	genlmsg_put(m_msg, 0, 0, m_nl80211Id, 0, flags, cmd, 0);
 	
@@ -238,16 +241,30 @@ nla_put_failure:
 
 bool Nl80211Base::SendWithRepeatingResponses()
 {
-	nl_send_auto_complete(m_sock, m_msg);
+	// "nl_send_auto_complete: DEPRECATED, please use nl_send_auto()"
+//	nl_send_auto_complete(m_sock, m_msg);
+	nl_send_auto(m_sock, m_msg);
 	// m_cbInfo.status = 1;
 	// m_cb (an nl_cb *) can hold > 1 callback, calls finish_handler()
 	//   when FINISHed, and list_interface_handler() foreach interface
 	nl_cb_set(m_cb, NL_CB_FINISH, NL_CB_CUSTOM, finish_handler, &m_cbInfo);
+	nl_cb_err(cb, NL_CB_CUSTOM, error_handler, &ret);
+	nl_cb_set(cb, NL_CB_ACK, NL_CB_CUSTOM, ack_handler, &ret);
 	// finish_handler() method sets m_cbInfo->status to zero when complete.
+	// [So does error_handler() and ack_handler()}
 	while (m_cbInfo.status > 0)
 	{
 		nl_recvmsgs(m_sock, m_cb);
 	}
+	if (m_cbInfo.errcode != 0)
+	{
+		// error_handler() was called!
+		string s("Nl80211:SendWithRepeatingResp() ERROR: ");
+		s += strerror(m_cbInfo.errcode);
+		LogErr(AT, s);
+		return false;
+	}
+	// else OK:
 	return true;
 }
 

@@ -36,15 +36,24 @@ class Nl80211Base;
 typedef struct
 {
 	Nl80211Base* m_pInstance;
+	// Set status to zero when complete:
 	int status;
+	// This is set by Error handler (if error occurred):
+	int errcode;
 } nl80211CallbackInfo;
 
 class Nl80211Base : protected Log
 {
 public:
 	Nl80211Base(const char* name);
-	// The NL80211_CMD_GET_INTERFACE command has two callback functions:
+	// The NL80211_CMD_GET_INTERFACE command has these callback functions:
+	// Complete:
 	static int finish_handler(struct nl_msg *msg, void *arg);
+	// An error occurred, set arg->errcode to (0 - err->error [a NEGATIVE int]);
+	static int error_handler(struct sockaddr_nl *nla, struct nlmsgerr *err, void *arg);
+	// Complete:
+	static int ack_handler(struct nl_msg *msg, void *arg);
+
 	// 'arg' is the last parameter to the xxx call:
 	// int nl_cb_set(struct nl_cb *cb, enum nl_cb_type type,
 	//      enum nl_cb_kind kind, nl_recvmsg_msg_cb_t func,

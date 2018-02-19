@@ -1,6 +1,9 @@
 // main.cpp - test code.
 // To build:
-// g++ -g -Wall -std=c++11 -I /usr/include/libnl3/ main.cpp InterfaceManagerNl80211.cpp Nl80211InterfaceAdmin.cpp ChannelSetterNl80211.cpp Nl80211Base.cpp Log.cpp -lnl-genl-3 -lnl-3 -o test
+// g++ -g -Wall -std=c++11 -I /usr/include/libnl3/ main.cpp InterfaceManagerNl80211.cpp Nl80211InterfaceAdmin.cpp ChannelSetterNl80211.cpp IfIoctls.cpp Nl80211Base.cpp Log.cpp -lnl-genl-3 -lnl-3 -o test
+//
+// Note: We do not have /usr/include/libnl3/ folder on ShadowV device.
+//        
 //
 // "netlink/netlink.h: No such file or directory":
 // Had to install:

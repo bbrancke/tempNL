@@ -72,6 +72,7 @@ public:
 	//       NL80211_CMD_SET_WIPHY - set frequency
 	bool SetupMessage(int flags, uint8_t cmd);
 	bool AddMessageParameterU32(enum nl80211_attrs parameterName, uint32_t value);
+	bool AddMessageParameterString(enum nl80211_attrs parameterName, const char *value);
 	// Call this when expecting multiple responses [e.g., GetInterfaceList()]:
 	bool SendWithRepeatingResponses();
 	// Send with no mult [e.g., SetChannel()]
