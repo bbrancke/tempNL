@@ -20,8 +20,54 @@ InterfaceManagerNl80211* InterfaceManagerNl80211::GetInstance()
 	return m_pInstance;
 }
 
-// bool InterfaceManagerNl80211::Init() implemented already; gets interface list
-//   and ensures exactly TWO phy Ids (two physical wi-fi devices).
+// At startup, main():
+//   Instantiates this (Singleton) for all to use.
+//   Calls my Init().
+//   (does some other startup stuff...)
+//   Calls my CreateInterfaces()
+//   At this point, main() can start hostapd on the newly created "ap0" interface.
+// Init() gets the list of current Wifi interfaces. We must have exactly TWO "phy" ids,
+//   one is the built-in TI chip we use for the AP and the STA (for alert emails).
+//   The other phy Id is the Realtek USB that we use for Survey mode.
+// Init() returns false if:
+//     it can't get Interface List from nl80211 OR
+//     number of 'Phy's is not two.
+//     [At startup, it is possible to have multiple interfaces defined
+//     but they map to a physical device, e.g. Phy #0 (built-in TI chip)
+//     can have Virtual Interface (VIF) "ap0" for hostapd and VIF "sta0"
+//     for email alerts (using wpa_supplicant to connect); "ap0" and "sta0"
+//     BOTH "map" to Phy #0.]
+bool InterfaceManagerNl80211::Init()
+{
+	if (!GetInterfaceList())
+	{
+		LogErr(AT, "InterfaceManagerNl80211::Init() can't get Interface List");
+		return false;
+	}
+	// Create a vector<(uint42_t)PhyId> from m_interfaces.
+	// This should have a count of two when done, or return false (ERROR, # of physical devices NOT two).
+	vector<uint32_t>phys;
+	for (OneInterface* i : m_interfaces)
+	{
+		uint32_t phyId = i->phy;
+		auto it = find(phys.begin(), phys.end(), phyId);
+		if (it == phys.end())
+		{
+			// This phyId is NOT in the phys list yet, add it...
+			phys.push_back(phyId);
+		}
+	}
+	// Normally we have phy 0 is the (built-in) TI, phy 1 is Realtek.
+	// If one re-sets itself or does weird things it can get a new Phy ID.
+	if (phys.size() != 2)
+	{
+		stringstream ss;
+		ss << "InterfaceManagerNl80211::Init(): Found " << phys.size() << " physical devices, expect TWO.";
+		LogErr(AT, ss);
+		return false;
+	}
+	return true;
+}
 
 bool InterfaceManagerNl80211::CreateInterfaces()
 {
@@ -95,20 +141,20 @@ bool InterfaceManagerNl80211::CreateInterfaces()
 
 	if (!CreateApInterface("ap0", phyId))
 	{
-		LogErr("CreateInterfaces(): Can't create AP Interface ap0!");
+		LogErr(AT, "CreateInterfaces(): Can't create AP Interface ap0!");
 		// NL80211 connection is closed and cleaned up at this point.
 		return false;
 	}
 	if (!CreateStationInterface("sta0", phyId))
 	{
-		LogErr("CreateInterfaces(): Can't create STA Interface sta0!");
+		LogErr(AT, "CreateInterfaces(): Can't create STA Interface sta0!");
 		return false;
 	}
 	
 	if (!m_ifIoctls.BringInterfaceDown("ap0")
 		|| !m_ifIoctls.BringInterfaceDown("sta0"))
 	{
-		LogErr("CreateInterfaces(): Can't bring Interface down.");
+		LogErr(AT, "CreateInterfaces(): Can't bring Interface down.");
 		return false;
 	}
 
@@ -120,17 +166,17 @@ bool InterfaceManagerNl80211::CreateInterfaces()
 	mac[3] = rand() % 256;
 	mac[4] = rand() % 256;
 	mac[5] = rand() % 256;
-	if (!m_ifIoctls.SetMacAddress("ap0", mac)
+	if (!m_ifIoctls.SetMacAddress("ap0", mac, false)
 		||
-		!m_ifIoctls.SetMacAddress("sta0", mac))
+		!m_ifIoctls.SetMacAddress("sta0", mac, false))
 	{
-		LogErr("CreateInterfaces(): Can't set Interface MAC address, continuing...");
+		LogErr(AT, "CreateInterfaces(): Can't set Interface MAC address, continuing...");
 	}
 	// Bring UP the two new TI interfaces:
 	if (!m_ifIoctls.BringInterfaceUp("ap0")
 		|| !m_ifIoctls.BringInterfaceUp("sta0"))
 	{
-		LogErr("CreateInterfaces(): Can't bring Interface up.");
+		LogErr(AT, "CreateInterfaces(): Can't bring Interface up.");
 		return false;
 	}
 	
@@ -178,14 +224,14 @@ bool InterfaceManagerNl80211::CreateInterfaces()
 
 	if (!m_ifIoctls.BringInterfaceUp("mon0"))
 	{
-		LogErr("CreateInterfaces(): Can't bring mon0 up.");
+		LogErr(AT, "CreateInterfaces(): Can't bring mon0 up.");
 		return false;
 	}
 
 	// Finally re-read the new interface list:
 	if (!GetInterfaceList())
 	{
-		LogErr("CreateInterfaces(): Can't re-read Interface List.");
+		LogErr(AT, "CreateInterfaces(): Can't re-read Interface List.");
 		return false;
 	}
 	return true;

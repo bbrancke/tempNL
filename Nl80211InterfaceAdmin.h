@@ -25,8 +25,9 @@ class Nl80211InterfaceAdmin : public Nl80211Base
 {
 public:
 	Nl80211InterfaceAdmin(const char *name);
-protected:
 	bool GetInterfaceList();
+protected:
+//	bool GetInterfaceList();
 	bool CreateApInterface(const char *newInterfaceName, uint32_t phyId);
 	bool CreateStationInterface(const char *newInterfaceName, uint32_t phyId);
 	bool CreateMonitorInterface(const char *newInterfaceName, uint32_t phyId);

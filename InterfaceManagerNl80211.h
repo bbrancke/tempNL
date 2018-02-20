@@ -7,10 +7,14 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <vector>
+#include <algorithm>
 
 #include <cstring>
 #include <cstdlib>
 #include <ctime>
+
+#include <stdint.h>
 
 #include "Log.h"
 #include "OneInterface.h"
@@ -30,11 +34,16 @@ class InterfaceManagerNl80211 : public Nl80211InterfaceAdmin
 {
 public:
 	static InterfaceManagerNl80211* GetInstance();
-	// Not copiable and not assignable:
+	// This is a singleton; not copiable and not assignable:
 	InterfaceManagerNl80211(InterfaceManagerNl80211 const&) = delete;
 	InterfaceManagerNl80211& operator=(InterfaceManagerNl80211 const&) = delete;
-
+	// Init() and CreateInterfaces() are called by main() at startup, in order:
+	bool Init();
 	bool CreateInterfaces();
+	// Next main() can start hostapd and begin surveys.
+	//
+	// Survey-ChannelChanger->ChannelSet class calls this
+	// (currently I ALWAYS return "mon0"):
 	const char *GetMonitorInterfaceName();
 private:
 	InterfaceManagerNl80211();  // Private so that ctor can't be called

@@ -2,7 +2,7 @@
 // To build:
 // g++ -g -Wall -std=c++11 -I /usr/include/libnl3/ main.cpp InterfaceManagerNl80211.cpp Nl80211InterfaceAdmin.cpp ChannelSetterNl80211.cpp IfIoctls.cpp Nl80211Base.cpp Log.cpp -lnl-genl-3 -lnl-3 -o test
 //
-// Note: We do not have /usr/include/libnl3/ folder on ShadowV device.
+// Note: We do not have /usr/include/libnl3/ folder on ShadowX device.
 //        
 //
 // "netlink/netlink.h: No such file or directory":
@@ -52,6 +52,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 	Log l;
+	bool rv;
 	// Here we need to choose InterfaceManagerNl80211 or InterfaceManagerWext
 	// (the latter is not implemented, so no real choice...)
 	//   IInterfaceManager im;  <== A ptr in real use,
@@ -60,5 +61,19 @@ int main(int argc, char* argv[])
 	//InterfaceManagerNl80211 im("InterfaceManagerNl80211");
 	//im.GetInterfaceList();
 	InterfaceManagerNl80211 *im = InterfaceManagerNl80211::GetInstance();
-	im->GetInterfaceList();
+	cout << "main(): calling Init()..." << endl;
+	rv = im->Init();
+	if (!rv)
+	{
+		cout << "main(): Init() failed!" << endl;
+		return 0;
+	}
+	cout << "main(): Init() OK, calling CreateInterfaces()..." << endl;
+	rv = im->CreateInterfaces();
+	if (!rv)
+	{
+		cout << "main(): CreateInterfaces() failed!" << endl;
+		return 0;
+	}
+	cout << "main(): CreateInterfaces() success, complete!" << endl << endl;
 }

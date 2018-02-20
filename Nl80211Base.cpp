@@ -156,17 +156,17 @@ bool Nl80211Base::Open()
 	return true;
 }
 
-bool Nl80211Base::GetDeviceId(const char* ifaceName)
+bool Nl80211Base::GetInterfaceIndex(const char* ifaceName, uint32_t& deviceId)
 {
 	try
 	{
-		m_deviceId = if_nametoindex(ifaceName);
+		deviceId = if_nametoindex(ifaceName);
 	}
 	catch(...)
 	{
-		m_deviceId = 0;
+		deviceId = 0;
 	}
-	if (m_deviceId == 0)
+	if (deviceId == 0)
 	{
 		string s("Can't get Device Id for: [");
 		s += ifaceName;
@@ -257,8 +257,8 @@ bool Nl80211Base::SendWithRepeatingResponses()
 	// m_cb (an nl_cb *) can hold > 1 callback, calls finish_handler()
 	//   when FINISHed, and list_interface_handler() foreach interface
 	nl_cb_set(m_cb, NL_CB_FINISH, NL_CB_CUSTOM, finish_handler, &m_cbInfo);
-	nl_cb_err(cb, NL_CB_CUSTOM, error_handler, &ret);
-	nl_cb_set(cb, NL_CB_ACK, NL_CB_CUSTOM, ack_handler, &ret);
+	nl_cb_err(m_cb, NL_CB_CUSTOM, error_handler, &m_cbInfo);
+	nl_cb_set(m_cb, NL_CB_ACK, NL_CB_CUSTOM, ack_handler, &m_cbInfo);
 	// finish_handler() method sets m_cbInfo->status to zero when complete.
 	// [So does error_handler() and ack_handler()}
 	while (m_cbInfo.status > 0)

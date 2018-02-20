@@ -10,12 +10,11 @@
 #include <cstring>  // std::strerror()
 #include <vector>
 
-// Use: "-I /usr/include/libnl3/"
-#include <netlink/socket.h>
-#include <netlink/netlink.h>
-#include <netlink/genl/genl.h>
-#include <netlink/genl/family.h>
-#include <netlink/genl/ctrl.h>
+#include "netlink/socket.h"
+#include "netlink/netlink.h"
+#include "netlink/genl/genl.h"
+#include "netlink/genl/family.h"
+#include "netlink/genl/ctrl.h"
 
 #include "net/if.h"  // if_nametoindex (can __THROW); note: conflicts with linux/if.h
 
@@ -65,7 +64,7 @@ public:
 	bool Close();
 	bool FreeMessage();
 	bool Open();
-	bool GetDeviceId(const char* ifaceName);
+	bool GetInterfaceIndex(const char* ifaceName, uint32_t& deviceId);
 	bool SetupCallback();
 	// flags: 0 or NLM_F_DUMP if repeating responses expected.
 	// cmd:  NL80211_CMD_GET_INTERFACE - get List of interfaces
@@ -82,7 +81,6 @@ public:
 		int macLength, const uint8_t *macAddress);
 protected:
 	Nl80211Base() { }
-	uint32_t m_deviceId;
 	vector<OneInterface *> m_interfaces;
 private:
 	struct nl_sock *m_sock = nullptr;

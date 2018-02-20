@@ -6,3 +6,46 @@
 #    [3. returns module (.c file name) and line number].
 #
 
+look for
+rtw_alloc_macid+0x140/0x1c8
+
+list *(rtw_alloc_macid+0x140)
+
+"No symbol rtw_alloc_macid) in current context"
+This is probably a driver with "m" selected (vs "*")
+8812au.ko : No symbols
+
+
+$ strings 8812au.ko | grep alloc:
+(lots of them) but:
+
+rtw_alloc_macid
+First lock aquired:
+rtw_alloc_stainfo+0x18c
+
+# strings 8812au.ko | grep rtw_alloc_stainfo
+rtw_alloc_stainfo
+
+This is where these two are: 8812au.ko
+
+~/yocto/build/tmp/work/duovero-poky-linux-gnueabi/rtl8812au-aircrack-ng/5.1.5-aircrack-ng-git+aa590f367d3d6fd6322478e02680cc82356c4b2e-r0/git/core$ grep -rn rtw_alloc_stainfo
+...
+
+rtw_sta_mgt.c:440:struct	sta_info *rtw_alloc_stainfo(struct	sta_priv *pstapriv, u8 *hwaddr)
+...
+alloc_macid:
+rtw_wlan_util.c:3623:void rtw_alloc_macid(_adapter *padapter, struct sta_info *psta)
+
+appears to be:
+include/osdep_service_linux.h:234:__inline static void _enter_critical_bh(_lock *plock, _irqL *pirqL)
+
+234:
+__inline static void _enter_critical_bh(_lock *plock, _irqL *pirqL)
+{
+	spin_lock_bh(plock);  == linux_function
+}
+
+__inline static void _exit_critical_bh(_lock *plock, _irqL *pirqL)
+{
+	spin_unlock_bh(plock);
+}

@@ -45,7 +45,7 @@ bool IfIoctls::GetFlags(const char *interfaceName, int& flags)
 	}
 
 	memset(&ifr, 0, sizeof(struct ifreq));
-	strncpy(ifr.ifr_name, in_dev, IFNAMSIZ);
+	strncpy(ifr.ifr_name, interfaceName, IFNAMSIZ);
 	if (ioctl(m_fd, SIOCGIFFLAGS, &ifr) < 0)
 	{
 		int myErr = errno;
@@ -89,7 +89,7 @@ bool IfIoctls::SetFlags(const char *interfaceName, int flags)
 bool IfIoctls::BringInterfaceUp(const char *interfaceName)
 {
 	int flags;
-	if (!GetFlags(interfaceName, flags)
+	if (!GetFlags(interfaceName, flags))
 	{
 		// Failure reason already logged.
 		return false;
@@ -101,7 +101,7 @@ bool IfIoctls::BringInterfaceUp(const char *interfaceName)
 bool IfIoctls::BringInterfaceDown(const char *interfaceName)
 {
 	int flags;
-	if (!GetFlags(interfaceName, flags)
+	if (!GetFlags(interfaceName, flags))
 	{
 		// Failure reason already logged.
 		return false;
@@ -120,7 +120,7 @@ bool IfIoctls::SetMacAddress(const char *ifaceName, const uint8_t *mac, bool isM
 
 	memset(&ifr, 0, sizeof(struct ifreq));
 	memcpy(&ifr.ifr_hwaddr.sa_data, mac, 6);
-	strncpy(ifr.ifr_name, interfaceName, IFNAMSIZ);
+	strncpy(ifr.ifr_name, ifaceName, IFNAMSIZ);
 	// For a normal 80211 interface (STA / AP)
 	// sa_family is ONE (Ethernet 10/100Mbps), this is ARPHRD_ETHER (== 1)
 	// (see /usr/include/net/if_arp.h)
@@ -133,7 +133,7 @@ bool IfIoctls::SetMacAddress(const char *ifaceName, const uint8_t *mac, bool isM
 			:
 			ARPHRD_ETHER;
 
-	if (ioctl(fd, SIOCSIFHWADDR, &dev) < 0)
+	if (ioctl(m_fd, SIOCSIFHWADDR, &ifr) < 0)
 	{
 		int myErr = errno;
 		Close();

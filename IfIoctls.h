@@ -9,6 +9,8 @@
 #include <string>
 #include <sstream>
 
+#include  <cstring>
+
 #include <stdint.h>
 #include <unistd.h>
 #include <sys/socket.h>

@@ -21,7 +21,7 @@ bool ChannelSetterNl80211::OpenConnection()
 	// Currently this ALWAYS "mon0" but this may change if re-creating
 	// a troubled iface name does not succeed.
 	interfaceName = im->GetMonitorInterfaceName();
-	GetInterfaceIndex(interfaceName, m_interfaceIndex);
+	im->GetInterfaceIndex(interfaceName, m_interfaceIndex);
 	return true;
 }
 
@@ -62,10 +62,8 @@ See /usr/include/linux/nl80211.h
 	{
 		return false;
 	}
-	// NLA_PUT_U32(msg, NL80211_ATTR_IFINDEX, devid);
-	// NLA_PUT_U32(msg, NL80211_ATTR_WIPHY_FREQ, freq);
-	// NLA_PUT_U32(msg, NL80211_ATTR_WIPHY_CHANNEL_TYPE, htval);
-	if (!AddMessageParameterU32(NL80211_ATTR_IFINDEX, m_deviceId)
+
+	if (!AddMessageParameterU32(NL80211_ATTR_IFINDEX, m_interfaceIndex)
 		||
 		!AddMessageParameterU32(NL80211_ATTR_WIPHY_FREQ, freq)
 		||
