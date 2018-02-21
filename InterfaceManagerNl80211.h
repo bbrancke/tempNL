@@ -50,6 +50,9 @@ private:
 	static InterfaceManagerNl80211* m_pInstance;
 	const uint8_t m_TiChipsetOui[3] = { 0xD0, 0xB5, 0xC2 };
 	IfIoctls m_ifIoctls;
+	bool GetTiInterfaceList(vector<OneInterface *>& tiInterfaces);
+	bool GetInterfaceByPhyAndName(uint32_t phyId, const char *name,
+		OneInterface **iface);
 };
 
 
