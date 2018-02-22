@@ -9,6 +9,7 @@
 #include <sstream>
 #include <cstring>  // std::strerror()
 #include <vector>
+#include <cstdio>
 
 #include "netlink/socket.h"
 #include "netlink/netlink.h"
@@ -46,11 +47,17 @@ class Nl80211Base : protected Log
 public:
 	Nl80211Base(const char* name);
 	// The NL80211_CMD_GET_INTERFACE command has these callback functions:
-	// Complete:
+	//    In C++, define "C-style" callback funcs as "static";
+	//       then we don't need "extern C { ... }" around them...
+	//       See: C-style callbacks in C++ at:
+	// http://tanks4code.blogspot.com/2008/07/c-style-callbacks-in-c-code.html
+	// On Complete:
 	static int finish_handler(struct nl_msg *msg, void *arg);
 	// An error occurred, set arg->errcode to (0 - err->error [a NEGATIVE int]);
 	static int error_handler(struct sockaddr_nl *nla, struct nlmsgerr *err, void *arg);
-	// Complete:
+	// On Command Complete:
+	//   Here, we only see "finish"ed handler called. ack_handler isn't called
+	//   (I think finish_handler()s ret val is sufficient)
 	static int ack_handler(struct nl_msg *msg, void *arg);
 
 	// 'arg' is the last parameter to the xxx call:
@@ -77,7 +84,7 @@ public:
 	// Send with no mult [e.g., SetChannel()]
 	bool SendAndFreeMessage();
 	void ClearInterfaceList();
-	void AddInterface(uint32_t phyId, const char *interfaceName,
+	void AddInterfaceToList(uint32_t phyId, const char *interfaceName,
 		int macLength, const uint8_t *macAddress);
 protected:
 	Nl80211Base() { }
@@ -89,55 +96,6 @@ private:
 	int32_t m_nl80211Id;
 	nl80211CallbackInfo m_cbInfo;
 };
-
-/*****
-C-style callbacks in C++:
-From:
-http://tanks4code.blogspot.com/2008/07/c-style-callbacks-in-c-code.html
-
-// this is the "additional information" we're going to
-// pass back to our callback
-typedef struct
-{
-  // stuff
-} callbackInfo;
-
-// this is the callback prototype
-typedef void (*cbfunc)(const callbackInfo*, void*);
-===========================================================
-User Side:
-// BB: Don't we need "CDecl" (or something like that) so the
-//   Calling Convention is right? Does the called method or
-//   the Caller do the stack cleanup? Apparently not...
-//
-// this is the "callback side" (user) class
-class CallMe
-{
-public:
-  CallMe()
-  {
-    globalCaller.registerCB(&myCallback, this);
-  }
-  ~CallMe()
-  {
-    globalCaller.deregisterCB(&myCallback, this);
-  }
-  static void myCallback(const callbackInfo* info, void* userData)
-  {
-    if (!userData) return;
-    ((CallMe*)userData)->localCallback(info);
-  }
-  void localCallback(const callbackInfo* info)
-  {
-    // do stuff
-  }
-}
-//
-// The NL80211_CMD_GET_INTERFACE command has two callback functions:
-//    static int finish_handler(struct nl_msg *msg, void *arg)
-// and:
-//    static int list_interface_handler(struct nl_msg *msg, void *arg)
-******/
 
 #endif  // NL80211BASE_H_
 

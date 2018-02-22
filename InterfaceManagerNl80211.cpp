@@ -168,6 +168,8 @@ bool InterfaceManagerNl80211::CreateInterfaces()
 	vector<OneInterface *> tiInterfaces;
 	bool found;
 	uint32_t phyId;
+// For debug, show InterfaceList:
+LogInterfaceList("CreateInterfaces Entry");
 	// Get list of Interfaces now using the TI chip:
 	// Need the phy ID for the TI chip, look for OUI (first 3 bytes)
 	// of "D0-B5-C2"
@@ -232,7 +234,7 @@ bool InterfaceManagerNl80211::CreateInterfaces()
 	}
 	else
 	{
-		if (!CreateApInterface("sta0", phyId))
+		if (!CreateStationInterface("sta0", phyId))
 		{
 			LogErr(AT, "CreateInterfaces(): Can't create Interface sta0!");
 			return false;
@@ -261,7 +263,7 @@ bool InterfaceManagerNl80211::CreateInterfaces()
 		LogErr(AT, "CreateInterfaces(): Can't re-read Interface List (1).");
 		return false;
 	}
-
+LogInterfaceList("CreateInterfaces: II");
 	// Delete all interfaces associated with this phy Id
 	// EXCEPT sta0 and ap0:
 	//  Delete..() and Create...() are in Nl80211InterfaceAdmin class
@@ -347,6 +349,7 @@ bool InterfaceManagerNl80211::CreateInterfaces()
 		LogErr(AT, "CreateInterfaces(): Can't re-read Interface List (2).");
 		return false;
 	}
+LogInterfaceList("CreateInterfaces: COMPLETE");
 	return true;
 }
 

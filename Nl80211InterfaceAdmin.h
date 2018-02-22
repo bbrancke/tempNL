@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <cstdio>
 
 #include <stdint.h>
 #include <unistd.h>
@@ -26,6 +27,7 @@ class Nl80211InterfaceAdmin : public Nl80211Base
 public:
 	Nl80211InterfaceAdmin(const char *name);
 	bool GetInterfaceList();
+	void LogInterfaceList(const char *caller);
 protected:
 //	bool GetInterfaceList();
 	bool CreateApInterface(const char *newInterfaceName, uint32_t phyId);

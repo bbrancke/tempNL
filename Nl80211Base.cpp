@@ -34,7 +34,7 @@ int Nl80211Base::list_interface_handler(struct nl_msg *msg, void *arg)
 		interfaceName = nla_get_string(tb_msg[NL80211_ATTR_IFNAME]);
 		len = nla_len(tb_msg[NL80211_ATTR_MAC]);
 		macAddress = (uint8_t *)nla_data(tb_msg[NL80211_ATTR_MAC]);
-		instance->AddInterface(phyId, interfaceName, len, macAddress);
+		instance->AddInterfaceToList(phyId, interfaceName, len, macAddress);
 	}
 	else
 	{
@@ -92,13 +92,9 @@ void Nl80211Base::ClearInterfaceList()
 	LogInfo("Nl80211: ClearInterfaceList()");
 }
 
-void Nl80211Base::AddInterface(uint32_t phyId, const char *interfaceName,
+void Nl80211Base::AddInterfaceToList(uint32_t phyId, const char *interfaceName,
 		int macLength, const uint8_t *macAddress)
 {
-	string s("Nl80211: AddInterface [");
-	s += interfaceName;
-	s += "]";
-	LogInfo(s);
 	OneInterface *pI = new OneInterface(phyId, interfaceName, macAddress, macLength);
 	m_interfaces.push_back(pI);
 }

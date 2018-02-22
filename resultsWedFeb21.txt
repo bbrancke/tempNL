@@ -1,3 +1,15 @@
+THU AM:
+	modified:   InterfaceManagerNl80211.cpp
+	modified:   Nl80211Base.cpp
+	modified:   Nl80211Base.h
+	modified:   Nl80211InterfaceAdmin.cpp
+	modified:   Nl80211InterfaceAdmin.h
+	modified:   resultsWedFeb21.txt
+
+[I had Create*Ap*Interface(..."sta0"...) sted Create*Station*Interface(...)],
+try it now...
+
+
 Results of running the new CreateInterfaces()
 ~# ./nl80211test
 LOG NAME: InterfaceManagerNl80211
@@ -19,6 +31,16 @@ main(): CreateInterfaces() failed!
 
 Kinda tired, this is as far as I got; probably there is a copy-pasta error here.
 
+THURS: Rename AddInterface() ==> AddInterfaceToList. DONE, no longer LogInfo()s each call to AddInterface()
+   Call: LogInterfaceList("CreateInterfaces: Initial") e.g., after 
+         Nl80211InterfaceAdmin.cpp::GetInterfaceList()
+     LogInterfaceList("[who]") is in Bl80211InterfaceAdmin, (not Nl80211Base)
+
+   === I had CreateApInterface("sta0"...); should be Create*Station*Interface... (fixed)
+      
+   
+   
+   
 
 root@duovero:~# ifconfig -a
 ap0       Link encap:Ethernet  HWaddr D0:B5:C2:E4:DC:E4

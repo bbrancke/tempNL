@@ -44,6 +44,30 @@ bool Nl80211InterfaceAdmin::GetInterfaceList()
 	return true;
 }
 
+void Nl80211InterfaceAdmin::LogInterfaceList(const char *caller)
+{
+	int j;
+	stringstream s;
+	s << "Nl80211Base: " << caller << ": Interface List has " <<
+		m_interfaces.size() << " elements:";
+	LogInfo(s);
+	LogInfo("        \tName:\tPhy\tMAC");
+	j = 0;
+	for (OneInterface *i : m_interfaces)
+	{
+		stringstream info;
+		char buf[32];
+		uint8_t *p = i->mac;
+		sprintf(buf, "%02x:%02x:%02x:%02x:%02x:%02x",
+			p[0], p[1], p[2], p[3], p[4], p[5]);
+		info << "List # " << j << "\t" << i->name << "\t" << i->phy << "\t" << buf;
+		LogInfo(info);
+		j++;
+	}
+	//       List # x   wlan0    0   xx:xx:xx:xx:xx:xx
+	LogInfo("============ End of Interface List ============");
+}
+
 // _createInterface(): private:
 bool Nl80211InterfaceAdmin::_createInterface(const char *newInterfaceName, 
 	uint32_t phyId, enum nl80211_iftype type)
@@ -86,7 +110,10 @@ bool Nl80211InterfaceAdmin::_createInterface(const char *newInterfaceName,
 	}
 
 	Close();
-	LogInfo("_createInterface() complete, success");
+	string cs("_createInterface('");
+	cs += newInterfaceName;
+	cs += "') complete, success.";
+	LogInfo(cs);
 
 	return true;
 }
