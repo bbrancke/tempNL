@@ -1,4 +1,27 @@
+Check this to to disable power save:
+
+https://www.raspberrypi.org/forums/viewtopic.php?t=46569
+
+In etc/network/interfaces add:
+
+wireless-power off
+
+right after  the wpa_supplicant line
+
+ALSO: Should change wlan0 to "sta0" and verify that it connects w/creating sta0 interface
+(just do it manually)
+
+
+
+auto wlan0
+allow-hotplug wlan0
+iface wlan0 inet dhcp
+wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
+wireless-power off  <=== HERE
+
 THU AM:
+
+
 	modified:   InterfaceManagerNl80211.cpp
 	modified:   Nl80211Base.cpp
 	modified:   Nl80211Base.h
