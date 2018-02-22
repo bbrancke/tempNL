@@ -1,0 +1,68 @@
+Results of running the new CreateInterfaces()
+~# ./nl80211test
+LOG NAME: InterfaceManagerNl80211
+LOG NAME: IfIoctls
+main(): calling Init()...
+INFO: Get InterfaceList() entry.
+INFO: Nl80211: AddInterface [wlan1]
+INFO: Nl80211: AddInterface [wlan0]
+INFO: finish_handler() called
+INFO: GetInterfaceList() complete, success
+main(): Init() OK, calling CreateInterfaces()...
+INFO: _createInterface() complete, success
+INFO: _createInterface() complete, success
+ERROR at: at...: Set interface flags failed: Name not unique on network
+ERROR at: at...: CreateInterfaces(): Can't bring Interface sta0 up.
+main(): CreateInterfaces() failed!
+
+   We see that ap0 and st0 do have random MAC addrs (diff from wlan0):
+
+Kinda tired, this is as far as I got; probably there is a copy-pasta error here.
+
+
+root@duovero:~# ifconfig -a
+ap0       Link encap:Ethernet  HWaddr D0:B5:C2:E4:DC:E4
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+eth0      Link encap:Ethernet  HWaddr 00:15:C9:29:1D:CD
+          BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+          Interrupt:71
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:256 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:256 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1
+          RX bytes:20736 (20.2 KiB)  TX bytes:20736 (20.2 KiB)
+
+sta0      Link encap:Ethernet  HWaddr D0:B5:C2:E4:DC:E4
+          BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+wlan0     Link encap:Ethernet  HWaddr D0:B5:C2:CB:90:CA
+          inet addr:192.168.0.183  Bcast:192.168.0.255  Mask:255.255.255.0
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:552 errors:0 dropped:25 overruns:0 frame:0
+          TX packets:279 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:589212 (575.4 KiB)  TX bytes:34542 (33.7 KiB)
+
+wlan1     Link encap:Ethernet  HWaddr EC:F0:0E:67:79:0A
+          BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
