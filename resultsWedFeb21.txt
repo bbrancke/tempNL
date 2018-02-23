@@ -1,3 +1,264 @@
+NEWEST RESULTS: Thursday 9:00 PM
+========================================================
+ran nl80211test to create "sta0" interface. It crashed HARD!
+    SEE LINE 130: BringUp("sta0") FAILED.
+
+# ls -l
+total 564
+-rw-r--r-- 1 root root   1073 Feb 19 07:21 addrfamily.c
+-rwxrwxrwx 1 root root    916 Feb  8 17:34 hostapd
+-rwxr-x--- 1 root root    783 Jan 31 15:43 iw_channel_change.sh
+-rwxr-xr-x 1 root root 530052 Feb 22 20:48 nl80211test
+drwxr-xr-x 3 root root   4096 Feb 10 07:16 show_wifi_interfaces
+-rwxr-x--- 1 root root   1466 Jan 31 15:52 showbatt.sh
+-rwxr-xr-x 1 root root  12368 Feb 19 07:21 testfam
+-rw-r--r-- 1 root root    116 Feb  8 14:26 wpa.conf
+-rwxr-xr-x 1 root root   2170 Feb 20 12:41 wpa_supplicant
+root@duovero:~# ps -ef | grep hostapd
+root      1291  1171  0 20:48 ttyO2    00:00:00 grep hostapd
+root@duovero:~# ps -ef | grep wpa
+root      1150     1  0 10:06 ?        00:00:00 /usr/sbin/wpa_supplicant -c/etc/wpa_supplicant/wpa_supplicant.conf -iwlan0 -Dnl80211 -B
+root      1293  1171  0 20:49 ttyO2    00:00:00 grep wpa
+root@duovero:~#
+root@duovero:~#
+root@duovero:~#
+root@duovero:~#
+root@duovero:~#
+root@duovero:~# date
+Thu Feb 22 20:49:13 EST 2018
+root@duovero:~# killall wpa_supplicant
+[38641.719299] wlan0: deauthenticating from f8:cf:c5:f7:48:e9 by local choice (Reason: 3=DEAUTH_LEAVING)
+root@duovero:~# ifconfig -a
+eth0      Link encap:Ethernet  HWaddr 00:15:C9:29:1D:CD
+          BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+          Interrupt:71
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:320 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:320 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1
+          RX bytes:25920 (25.3 KiB)  TX bytes:25920 (25.3 KiB)
+
+wlan0     Link encap:Ethernet  HWaddr D0:B5:C2:CB:90:CA
+          inet addr:192.168.0.183  Bcast:192.168.0.255  Mask:255.255.255.0
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:65611 errors:0 dropped:19247 overruns:0 frame:0
+          TX packets:6953 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:14034626 (13.3 MiB)  TX bytes:789884 (771.3 KiB)
+
+wlan1     Link encap:Ethernet  HWaddr EC:F0:0E:67:79:0A
+          BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+root@duovero:~# ps -ef | grep wpa
+root      1303  1171  0 20:49 ttyO2    00:00:00 grep wpa
+root@duovero:~# ./nl80211test
+LOG NAME: InterfaceManagerNl80211
+LOG NAME: IfIoctls
+main(): calling Init()...
+INFO: Get InterfaceList() entry.
+INFO: finish_handler() called
+[38673.444549] ------------[ cut here ]------------
+INFO: GetInterfaceList() complete, success
+main(): Init() OK, calling CreateInterfaces()...
+INFO: Nl80211Base: CreateInterfaces Entry: Interface List has 2 el[38673.462707] WARNING: CPU: 1 PID: 1304 at /home/office/yocto/build/tmp/work-shared/duovero/kernel-source/drivers/net/wireless/ti/wlcore/sdio.c:145 wl12xx_sdio_raw_write+0xa4/0x130 [wlcore_sdio]
+ements:
+INFO:           Name:   Phy     MAC
+INFO: Lis[38673.485504] Modules linked in: ctrt # 0     wlan1   1       ec:f0:0e:67:79:0a
+INFO: List # 1   ccmwlan0       0       d0:b5:c2:cb:90:ca
+INFO: ============ En nfc bluetoothd of Interface List ============
+INFO: _createI arc4nterface('sta0') complete, success.
+ wl18xx wlcore 8812au(O) mac80211 cfg80211 rfkill wlcore_sdio smsc911x
+[38673.515106] CPU: 1 PID: 1304 Comm: nl80211test Tainted: G           O    4.9.67-jumpnow #2
+[38673.524993] Hardware name: Generic OMAP4 (Flattened Device Tree)
+[38673.524993] [<c0110030>] (unwind_backtrace) from [<c010c1ac>] (show_stack+0x10/0x14)
+[38673.524993] [<c010c1ac>] (show_stack) from [<c03c1240>] (dump_stack+0xa0/0xd4)
+[38673.545166] [<c03c1240>] (dump_stack) from [<c0134a94>] (__warn+0xd8/0x104)
+[38673.545166] [<c0134a94>] (__warn) from [<c0134b6c>] (warn_slowpath_null+0x20/0x28)
+[38673.555450] [<c0134b6c>] (warn_slowpath_null) from [<bf00a24c>] (wl12xx_sdio_raw_write+0xa4/0x130 [wlcore_sdio])
+[38673.565032] [<bf00a24c>] (wl12xx_sdio_raw_write [wlcore_sdio]) from [<bf44fba4>] (wl1271_ps_elp_wakeup+0x158/0x22c [wlcore])
+[38673.586456] [<bf44fba4>] (wl1271_ps_elp_wakeup [wlcore]) from [<bf4456e8>] (wl1271_op_add_interface+0x7c/0x9cc [wlcore])
+[38673.586456] [<bf4456e8>] (wl1271_op_add_interface [wlcore]) from [<bf1cefdc>] (drv_add_interface+0x80/0x418 [mac80211])
+[38673.605010] [<bf1cefdc>] (drv_add_interface [mac80211]) from [<bf1f06a0>] (ieee80211_do_open+0x418/0x8f0 [mac80211])
+[38673.615051] [<bf1f06a0>] (ieee80211_do_open [mac80211]) from [<c05d79b8>] (__dev_open+0xac/0x118)
+[38673.625030] [<c05d79b8>] (__dev_open) from [<c05d7c44>] (__dev_change_flags+0x88/0x14c)
+[38673.625030] [<c05d7c44>] (__dev_change_flags) from [<c05d7d20>] (dev_change_flags+0x18/0x48)
+[38673.645019] [<c05d7d20>] (dev_change_flags) from [<c064f804>] (devinet_ioctl+0x738/0x840)
+[38673.645019] [<c064f804>] (devinet_ioctl) from [<c05b4790>] (sock_ioctl+0x15c/0x2f0)
+[38673.664947] [<c05b4790>] (sock_ioctl) from [<c02782e0>] (do_vfs_ioctl+0x90/0xa48)
+[38673.664947] [<c02782e0>] (do_vfs_ioctl) from [<c0278ccc>] (SyS_ioctl+0x34/0x5c)
+[38673.674346] [<c0278ccc>] (SyS_ioctl) from [<c01077a0>] (ret_fast_syscall+0x0/0x1c)
+[38673.690185] ---[ end trace c2aebd08bcfe2de4 ]---
+[38673.695770] wl1271_sdio mmc1:0001:2: sdio write failed (-110)
+[38673.699066] ------------[ cut here ]------------
+[38673.707061] WARNING: CPU: 1 PID: 1304 at /home/office/yocto/build/tmp/work-shared/duovero/kernel-source/drivers/net/wireless/ti/wlcore/main.c:796 wl12xx_queue_recovery_work.part.9+0x54/0x5c [wlcore]
+[38673.726043] Modules linked in: ctr ccm nfc bluetooth arc4 wl18xx wlcore 8812au(O) mac80211 cfg80211 rfkill wlcore_sdio smsc911x
+[38673.735504] CPU: 1 PID: 1304 Comm: nl80211test Tainted: G        W  O    4.9.67-jumpnow #2
+[38673.747009] Hardware name: Generic OMAP4 (Flattened Device Tree)
+[38673.747009] [<c0110030>] (unwind_backtrace) from [<c010c1ac>] (show_stack+0x10/0x14)
+[38673.747009] [<c010c1ac>] (show_stack) from [<c03c1240>] (dump_stack+0xa0/0xd4)
+[38673.747009] [<c03c1240>] (dump_stack) from [<c0134a94>] (__warn+0xd8/0x104)
+[38673.747009] [<c0134a94>] (__warn) from [<c0134b6c>] (warn_slowpath_null+0x20/0x28)
+[38673.784637] [<c0134b6c>] (warn_slowpath_null) from [<bf442a74>] (wl12xx_queue_recovery_work.part.9+0x54/0x5c [wlcore])
+[38673.784637] [<bf442a74>] (wl12xx_queue_recovery_work.part.9 [wlcore]) from [<bf44fb58>] (wl1271_ps_elp_wakeup+0x10c/0x22c [wlcore])
+[38673.808807] [<bf44fb58>] (wl1271_ps_elp_wakeup [wlcore]) from [<bf4456e8>] (wl1271_op_add_interface+0x7c/0x9cc [wlcore])
+[38673.808807] [<bf4456e8>] (wl1271_op_add_interface [wlcore]) from [<bf1cefdc>] (drv_add_interface+0x80/0x418 [mac80211])
+[38673.808807] [<bf1cefdc>] (drv_add_interface [mac80211]) from [<bf1f06a0>] (ieee80211_do_open+0x418/0x8f0 [mac80211])
+[38673.808807] [<bf1f06a0>] (ieee80211_do_open [mac80211]) from [<c05d79b8>] (__dev_open+0xac/0x118)
+[38673.844787] [<c05d79b8>] (__dev_open) from [<c05d7c44>] (__dev_change_flags+0x88/0x14c)
+[38673.854156] [<c05d7c44>] (__dev_change_flags) from [<c05d7d20>] (dev_change_flags+0x18/0x48)
+[38673.854156] [<c05d7d20>] (dev_change_flags) from [<c064f804>] (devinet_ioctl+0x738/0x840)
+[38673.880126] [<c064f804>] (devinet_ioctl) from [<c05b4790>] (sock_ioctl+0x15c/0x2f0)
+[38673.888214] [<c05b4790>] (sock_ioctl) from [<c02782e0>] (do_vfs_ioctl+0x90/0xa48)
+[38673.888214] [<c02782e0>] (do_vfs_ioctl) from [<c0278ccc>] (SyS_ioctl+0x34/0x5c)
+[38673.888214] [<c0278ccc>] (SyS_ioctl) from [<c01077a0>] (ret_fast_syscall+0x0/0x1c)
+[38673.911926] ---[ end trace c2aebd08bcfe2de5 ]---
+[38673.917419] wlcore: Hardware recovery in progress. FW ver: Rev 8.9.0.0.69
+[38673.924621] wlcore: down
+ERROR at: at...: Set interface flags failed: Connection timed out
+ERROR at: at.[38673.931091] ieee80211 phy0: Hardware restart was requested
+..: CreateInterfaces(): Can't bring Interface sta0 up.
+main(): CreateInterfaces() failed!
+root@duovero:~# [38674.250915] wlcore: ERROR firmware boot failed despite 3 retries
+[38674.257354] ------------[ cut here ]------------
+[38674.257354] WARNING: CPU: 0 PID: 21 at /home/office/yocto/build/tmp/work-shared/duovero/kernel-source/net/mac80211/util.c:1899 ieee80211_reconfig+0x83c/0x3050 [mac80211]
+[38674.279144] Modules linked in: ctr ccm nfc bluetooth arc4 wl18xx wlcore 8812au(O) mac80211 cfg80211 rfkill wlcore_sdio smsc911x
+[38674.291290] CPU: 0 PID: 21 Comm: kworker/0:1 Tainted: G        W  O    4.9.67-jumpnow #2
+[38674.300018] Hardware name: Generic OMAP4 (Flattened Device Tree)
+[38674.300018] Workqueue: events_freezable ieee80211_restart_work [mac80211]
+[38674.314056] [<c0110030>] (unwind_backtrace) from [<c010c1ac>] (show_stack+0x10/0x14)
+[38674.314056] [<c010c1ac>] (show_stack) from [<c03c1240>] (dump_stack+0xa0/0xd4)
+[38674.314056] [<c03c1240>] (dump_stack) from [<c0134a94>] (__warn+0xd8/0x104)
+[38674.337219] [<c0134a94>] (__warn) from [<c0134b6c>] (warn_slowpath_null+0x20/0x28)
+[38674.337219] [<c0134b6c>] (warn_slowpath_null) from [<bf2196d0>] (ieee80211_reconfig+0x83c/0x3050 [mac80211])
+[38674.337219] [<bf2196d0>] (ieee80211_reconfig [mac80211]) from [<bf1caa90>] (ieee80211_restart_work+0x84/0xb0 [mac80211])
+[38674.368927] [<bf1caa90>] (ieee80211_restart_work [mac80211]) from [<c015354c>] (process_one_work+0x2b4/0x85c)
+[38674.368927] [<c015354c>] (process_one_work) from [<c0154674>] (worker_thread+0x3c/0x574)
+[38674.368927] [<c0154674>] (worker_thread) from [<c015a084>] (kthread+0xd0/0xf0)
+[38674.368927] [<c015a084>] (kthread) from [<c0107830>] (ret_from_fork+0x14/0x24)
+[38674.403320] ---[ end trace c2aebd08bcfe2de6 ]---
+[38674.421478] ------------[ cut here ]------------
+[38674.426910] WARNING: CPU: 0 PID: 21 at /home/office/yocto/build/tmp/work-shared/duovero/kernel-source/net/mac80211/driver-ops.h:17 drv_remove_interface+0x338/0x408 [mac80211]
+[38674.443450] wlan0:  Failed check-sdata-in-driver check, flags: 0x4
+[38674.450012] Modules linked in: ctr ccm nfc bluetooth arc4 wl18xx wlcore 8812au(O) mac80211 cfg80211 rfkill wlcore_sdio smsc911x
+[38674.462310] CPU: 0 PID: 21 Comm: kworker/0:1 Tainted: G        W  O    4.9.67-jumpnow #2
+[38674.462310] Hardware name: Generic OMAP4 (Flattened Device Tree)
+[38674.477661] Workqueue: events_freezable ieee80211_restart_work [mac80211]
+[38674.477661] [<c0110030>] (unwind_backtrace) from [<c010c1ac>] (show_stack+0x10/0x14)
+[38674.477661] [<c010c1ac>] (show_stack) from [<c03c1240>] (dump_stack+0xa0/0xd4)
+[38674.500671] [<c03c1240>] (dump_stack) from [<c0134a94>] (__warn+0xd8/0x104)
+[38674.500671] [<c0134a94>] (__warn) from [<c0134af4>] (warn_slowpath_fmt+0x34/0x44)
+[38674.515045] [<c0134af4>] (warn_slowpath_fmt) from [<bf1cfad0>] (drv_remove_interface+0x338/0x408 [mac80211])
+[38674.515045] [<bf1cfad0>] (drv_remove_interface [mac80211]) from [<bf1effec>] (ieee80211_do_stop+0x5fc/0x870 [mac80211])
+[38674.535034] [<bf1effec>] (ieee80211_do_stop [mac80211]) from [<bf1f0270>] (ieee80211_stop+0x10/0x18 [mac80211])
+[38674.539978] [<bf1f0270>] (ieee80211_stop [mac80211]) from [<c05cc118>] (__dev_close_many+0x90/0xdc)
+[38674.560638] [<c05cc118>] (__dev_close_many) from [<c05cc1d4>] (dev_close_many+0x70/0x104)
+[38674.560638] [<c05cc1d4>] (dev_close_many) from [<c05d1d2c>] (dev_close+0x40/0x58)
+[38674.574890] [<c05d1d2c>] (dev_close) from [<bf020a2c>] (cfg80211_shutdown_all_interfaces+0x34/0xb8 [cfg80211])
+[38674.589263] [<bf020a2c>] (cfg80211_shutdown_all_interfaces [cfg80211]) from [<bf219164>] (ieee80211_reconfig+0x2d0/0x3050 [mac80211])
+[38674.589263] [<bf219164>] (ieee80211_reconfig [mac80211]) from [<bf1caa90>] (ieee80211_restart_work+0x84/0xb0 [mac80211])
+[38674.604919] [<bf1caa90>] (ieee80211_restart_work [mac80211]) from [<c015354c>] (process_one_work+0x2b4/0x85c)
+[38674.620635] [<c015354c>] (process_one_work) from [<c0154674>] (worker_thread+0x3c/0x574)
+[38674.634216] [<c0154674>] (worker_thread) from [<c015a084>] (kthread+0xd0/0xf0)
+[38674.635070] [<c015a084>] (kthread) from [<c0107830>] (ret_from_fork+0x14/0x24)
+[38674.649566] ---[ end trace c2aebd08bcfe2de7 ]---
+
+root@duovero:~# ifconfig -a
+eth0      Link encap:Ethernet  HWaddr 00:15:C9:29:1D:CD
+          BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+          Interrupt:71
+
+lo        Link encap:Local Loopback
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:320 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:320 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1
+          RX bytes:25920 (25.3 KiB)  TX bytes:25920 (25.3 KiB)
+
+sta0      Link encap:Ethernet  HWaddr D0:B5:C2:18:77:7B
+          BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+wlan0     Link encap:Ethernet  HWaddr D0:B5:C2:CB:90:CA
+          inet addr:192.168.0.183  Bcast:192.168.0.255  Mask:255.255.255.0
+          BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:65611 errors:0 dropped:19247 overruns:0 frame:0
+          TX packets:6953 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:14034626 (13.3 MiB)  TX bytes:789884 (771.3 KiB)
+
+wlan1     Link encap:Ethernet  HWaddr EC:F0:0E:67:79:0A
+          BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+root@duovero:~# ifconfig sta0 up
+[38759.620361] wlcore: ERROR firmware boot failed despite 3 retries
+ifconfig: SIOCSIFFLAGS: Connection timed out
+root@duovero:~# ifconfig wlan0 up
+[38769.540405] wlcore: ERROR firmware boot failed despite 3 retries
+ifconfig: SIOCSIFFLAGS: Connection timed out
+
+Lets try creating sta0 on phy1 (the USB radio):
+iw dev wlan1 interface add mon0 type monitor
+iw dev wlan1 interface add sta0 type managed
+
+Valid interface types are: managed, ibss, monitor, mesh, wds.
+NOPE, won't let you do it. SHIT.
+========================================================
+Files changed on THURSDAY, coping to bitbake project:
+==========================================================
+CHANGED (C) / NEW bet Wed night and Thursday night:
+
+C InterfaceManagerNl80211.cpp  - fix: sta0 was created as an AP
+C IfIoctls.cpp
+C IfIoctls.h  -- NEW: SetPowerSaveModeOff()
+N ShxWireless.h -- replaces use of #include <linux/wireless.h>
+                   which causes compile errors "redef of struct [I forget]"
+
+C Nl80211Base.cpp
+C Nl80211Base.h  -- AddInterface() RENAMED TO: AddInterfaceToList(),
+                    no longer shows "adding [name] on each callback.
+
+C Nl80211InterfaceAdmin.cpp
+C Nl80211InterfaceAdmin.h  -- NEW: LogInterfaceList("who")
+                              For debug, call this after GetInterfaceList()
+                              _createInterface(name) now Logs Iface name
+                              "CreateInterface [name] complete, success"
+                              (for debugging)
+==========================================================
+TODO: Call m_IfIoctls::SetWirelessPowerSaveOff(const char *ifaceName)
+  for "sta0" and "ap0" - disables "Power Save" mode to keep
+  the TI chip from crashing when it resumes power.
+  (See notes on the reason in IfIoctls.cpp / .h)
+  -- This is how "iwconfig wlan0 power off" does it.
+  -- I set it manually around noon, at 9:00 PM it has not
+     complained / crashed AT ALL!
+To verify, just run iwconfig and look for: "Power Management:off"
+  on the interfaces ap0 and sta0.
+ 
+
+
 Check this to to disable power save:
 
 https://www.raspberrypi.org/forums/viewtopic.php?t=46569
