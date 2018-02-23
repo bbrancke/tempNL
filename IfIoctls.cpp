@@ -147,3 +147,32 @@ bool IfIoctls::SetMacAddress(const char *ifaceName, const uint8_t *mac, bool isM
 	return true;
 }
 
+// The TI chip crashes badly coming out of power save mode sometimes,
+// causes loss of interface (and the AP!). So turn off power save mode:
+bool IfIoctls::SetWirelessPowerSaveOff(const char *ifaceName)
+{
+	// NO: struct iwreq wrq;
+	// In here we want to use the ShadowX version of iwreq,
+	//   derived from linux/wireless.h:
+	shx_iwreq wrq;
+
+	if (!Open())
+	{
+		return false;
+	}
+	memset(&wrq, 0, sizeof(shx_iwreq));
+	wrq.u.power.disabled = 1;
+	strncpy(wrq.ifr_name, ifaceName, sizeof(wrq.ifr_name));
+	// 0 = Success, -1 = error (errno is set)
+	if (ioctl(m_fd, SHX_SIOCSIWPOWER, &wrq) < 0)
+	{
+		int myErr = errno;
+		Close();
+		string s("SetWirelessPowerSaveOff: Can't set SIOCSIWPOWER: ");
+		s += strerror(myErr);
+		LogErr(AT, s);
+		return false;
+	}
+	return true;
+}
+
