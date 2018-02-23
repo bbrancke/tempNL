@@ -194,10 +194,42 @@ LogInterfaceList("CreateInterfaces Entry");
 	mac[4] = rand() % 256;
 	mac[5] = rand() % 256;
 
-	// Do we already have VIF "ap0"?
+	// Create and bring up 'sta0' interface first on the TI-phy.
+	// 'sta0' will send alert emails for us.
+	// Do we already have VIF "sta0"?
+	if (GetInterfaceByPhyAndName(phyId, "sta0", &oneIface))
+	{
+		LogInfo("CreateInterfaces(): sta0 already exists, not creating.");
+	}
+	else
+	{
+		if (!CreateStationInterface("sta0", phyId))
+		{
+			LogErr(AT, "CreateInterfaces(): Can't create Interface sta0!");
+			return false;
+		}
+	}
+	if (!m_ifIoctls.BringInterfaceDown("sta0"))
+	{
+		LogErr(AT, "CreateInterfaces(): Can't bring Interface sta0 down.");
+		return false;
+	}
+
+	if (!m_ifIoctls.SetMacAddress("sta0", mac, false))
+	{
+		LogErr(AT, "CreateInterfaces(): Can't set Interface sta0's MAC address, continuing...");
+	}
+	// Bring UP the interface:
+	if (!m_ifIoctls.BringInterfaceUp("sta0"))
+	{
+		LogErr(AT, "CreateInterfaces(): Can't bring Interface sta0 up.");
+		return false;
+	}
+
+	// Do the same thing for"ap0", this is for ShadowX's access point.
 	if (GetInterfaceByPhyAndName(phyId, "ap0", &oneIface))
 	{
-		LogInfo("CreateInterfaces(): ap0 already exists, leaving alone.");
+		LogInfo("CreateInterfaces(): ap0 already exists, not creating.");
 	}
 	else
 	{
@@ -223,37 +255,6 @@ LogInterfaceList("CreateInterfaces Entry");
 	if (!m_ifIoctls.BringInterfaceUp("ap0"))
 	{
 		LogErr(AT, "CreateInterfaces(): Can't bring Interface ap0 up.");
-		return false;
-	}
-
-	// Now repeat for "sta0" interface:
-	// Do we already have VIF "ap0"?
-	if (GetInterfaceByPhyAndName(phyId, "sta0", &oneIface))
-	{
-		LogInfo("CreateInterfaces(): sta0 already exists, leaving alone.");
-	}
-	else
-	{
-		if (!CreateStationInterface("sta0", phyId))
-		{
-			LogErr(AT, "CreateInterfaces(): Can't create Interface sta0!");
-			return false;
-		}
-	}
-	if (!m_ifIoctls.BringInterfaceDown("sta0"))
-	{
-		LogErr(AT, "CreateInterfaces(): Can't bring Interface sta0 down.");
-		return false;
-	}
-
-	if (!m_ifIoctls.SetMacAddress("sta0", mac, false))
-	{
-		LogErr(AT, "CreateInterfaces(): Can't set Interface sta0's MAC address, continuing...");
-	}
-	// Bring UP the interface:
-	if (!m_ifIoctls.BringInterfaceUp("sta0"))
-	{
-		LogErr(AT, "CreateInterfaces(): Can't bring Interface sta0 up.");
 		return false;
 	}
 
