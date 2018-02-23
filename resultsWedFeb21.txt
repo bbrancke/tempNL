@@ -1,4 +1,15 @@
 NEWEST RESULTS: Thursday 9:00 PM
+
+
+POWER SAVE line in /etc/network/interfaces DID NOT WORK!
+  After reboot, wlan0 associated but crashed after about ten mins.
+  At 9:15 (power cycle), then
+   iwconfig wlan0   shows "Power Management:on"
+   iwconfig wlan0 power off
+   iwconfig wlan0 now  shows "Power Management:off"
+   
+   
+   
 ========================================================
 ran nl80211test to create "sta0" interface. It crashed HARD!
     SEE LINE 130: BringUp("sta0") FAILED.
