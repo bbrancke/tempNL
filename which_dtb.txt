@@ -1,0 +1,30 @@
+include/configs/ti_omap4_common.h:126:			"echo WARNING: Could not
+ determine device tree to use; fi; \0" \
+spl/u-boot-spl.cfg:463:#define CONFIG_EXTRA_ENV_SETTINGS DEFAULT_LINUX_BOOT_ENV 
+"console=ttyO2,115200n8 ... (has "device tree" in here... oh, here it is:)
+...
+...
+(looks for $board_name: sdp4430, panda, panda-a4, panda-es, and finally:
+"if test $board_name = duovero; then " "setenv fdtfile omap4-duovero-parlor.dtb; fi;" "if test 
+$fdtfile = undefined; then " "echo WARNING: Could not determine device tree to u
+se; fi; \0"
+
+u-boot:
+.dtb file ('fdtfile') is:
+omap4-duovero-parlor.dtb
+
+In (rootfs)/boot:
+omap4-duovero-parlor.dtb is a symlink to:
+   (rootfs)/boot/devicetree-zImage-omap4-duovero-parlor.dtb
+   
+So look in:
+~/yocto/build/tmp/work/duovero-poky-linux-gnueabi/u-boot/[Version e.g., 2015.07-r0]/git/spl/
+for file: u-boot-spl.cfg
+grep for duovero for line #, get fdtfile name...
+
+
+
+
+
+
+
