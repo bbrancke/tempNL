@@ -22,6 +22,14 @@ So look in:
 for file: u-boot-spl.cfg
 grep for duovero for line #, get fdtfile name...
 
+This DTB file is here"
+~/yocto/build/tmp/work/duovero-poky-linux-gnueabi/linux-gumstix/[Version, 3.18.21-r0]/linux-duovero-standard-build/arch/arm/boot/dts:
+ls
+omap4-duovero-garret50c.dtb  omap4-duovero-parlor.dtb
+(two files only)
+
+
+
 
 
 
