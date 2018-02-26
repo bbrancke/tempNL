@@ -28,6 +28,7 @@ ls
 omap4-duovero-garret50c.dtb  omap4-duovero-parlor.dtb
 (two files only)
 
+
 On jumpnow / Frank:
 u-boot is diff, but I see "setenv fdtfile omap4-duovero-parlor.dtb" 
   [ in u-boot folder "grep -rn jumpnow" returns NOTHING. ]
@@ -120,7 +121,30 @@ Diff bet (b) and (d): (d) has added pinmux_spi1_pins, and spi4 pins.
                  differ by one (d) <0x93>, (b) has <0x92>
 
 
+Diff bet (a) and (b):
+    "regulator-wlcore-bt-en" fixedregulator@2 (a) has enable-active-high, (b) does NOT
+    reg@1 DOES have this in both. reg1: "regulator-wlcore-wl-en"
 
+    interrupt-controller@48241000 -- both have; (b) has extra entries.
+    (b) also has interrupt-controller@482*8*1000
+    ethernet@gpmc  different 
+    (b) has gpadc {...} paragraph
+    in mmc@480d5000 { ... (b) has ADDED:
+    wlcore@0 {
+				compatible = "ti,wl1831"; ... }
+=======
+in ~/yocto/poky/meta-gumstix/recipes-kernel/linux/linux-gumstix_3.18.bb:
+...
+KERNEL_DEVICETREE_duovero = "omap4-duovero-parlor.dtb \
+                             omap4-duovero-garret50c.dtb \
+"
+...
+
+~/yocto/build/tmp/work/duovero-poky-linux-gnueabi/linux-gumstix/3.18.21-r0/git/arch/arm/boot/dts/
+omap4-duovero-parlor.dts  is 4159 bytes, 2/23/2018. #includes:
+10:#include "omap4-duovero.dtsi"
+12:#include <dt-bindings/input/input.h>
+135:#include "omap-gpmc-smsc911x.dtsi"
 
 
 
