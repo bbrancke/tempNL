@@ -22,11 +22,108 @@ So look in:
 for file: u-boot-spl.cfg
 grep for duovero for line #, get fdtfile name...
 
-This DTB file is here"
+This DTB file is here" [==A==]
 ~/yocto/build/tmp/work/duovero-poky-linux-gnueabi/linux-gumstix/[Version, 3.18.21-r0]/linux-duovero-standard-build/arch/arm/boot/dts:
 ls
 omap4-duovero-garret50c.dtb  omap4-duovero-parlor.dtb
 (two files only)
+
+On jumpnow / Frank:
+u-boot is diff, but I see "setenv fdtfile omap4-duovero-parlor.dtb" 
+  [ in u-boot folder "grep -rn jumpnow" returns NOTHING. ]
+...
+In [==A==] we have:
+-rw-r--r-- 1 office office 57571 Feb  2 11:21 jumpnow-duovero-parlor.dtb
+======= It is using THIS ONE                  +------------------------+
+-rw-r--r-- 1 office office 57044 Feb  2 11:21 jumpnow-duovero-parlor-nodisplay.dtb
+-rw-r--r-- 1 office office 57021 Feb  2 11:21 omap4-duovero-parlor.dtb
+/boot/ folder:
+
+lrwxrwxrwx 1 root root        42 Jan 31 15:33 omap4-duovero-parlor.dtb -> devicetree-zImage-omap4-duovero-parlor.dtb
+=== I *think* it is using this one -----------+--------------------------------------------------------------------+
+
+=== TEST: RENAME THE symlink and re-start:
+======== 1. mv omap4-duovero-parlor.dtb BBomap4-duovero-parlor.dtb, STILL CAME UP!
+=========== 2. mv jumpnow-duovero-parlor.dtb BBjumpnow-duovero-parlor.dtb
+=========== 2a. u-boot reports "Starting..." / "** File not found /boot/omap4-duovero-parlor.dtb **"
+=========== 2b. UN-DO step (2). Still nogo; "** File not found /boot/omap4-duovero-parlor.dtb **"
+===========     Does NOT start....
+Also have:
+lrwxrwxrwx 1 root root    54 Jan 31 15:33 jumpnow-duovero-parlor-nodisplay.dtb -> devicetree-zImage-jumpnow-duovero-parlor-nodisplay.dtb
+lrwxrwxrwx 1 root root    44 Jan 31 15:33 jumpnow-duovero-parlor.dtb -> devicetree-zImage-jumpnow-duovero-parlor.dtb
+==== It is using this one ----------------+========================================================================+
+[==B==]
+
+
+lrwxrwxrwx 1 root root    42 Jan 31 15:33 omap4-duovero-parlor.dtb -> devicetree-zImage-omap4-duovero-parlor.dtb
+  
+Let's compare 3.18's omap4-duovero-parlor.dtb
+with 4.9's
+      omap4
+AND   jumpnow-duovero-parlor.
+
+(AND 4.9 omap with 4.9 jumpnow-duovero-parlor)
+
+~/device_trees/ has .dtbs from the two SD cards.
+~/device_trees/src - copies from ~/device_trees/, along with .dts files made by dtc:
+
+~/device_trees/src$ ls -l
+total 400
+-rw-r--r-- 1 office office 54885 Feb 24 16:12 devicetree-3.18-duo-parlor-dtb
+-rw-r--r-- 1 office office 57021 Feb 25 18:34 devicetree-4.9-omap4-duo-parlor.dtb
+-rw-r--r-- 1 office office 57044 Feb 24 16:14 devicetree-zImage-jumpnow-duovero-parlor-nodisplay.dtb
+-rw-rw-r-- 1 office office 73276 Feb 24 16:13 duo-parlor-3-18.dts
+-rw-rw-r-- 1 office office 78251 Feb 24 16:15 duo-parlor-jumpnow-nodisplay.dts
+-rw-rw-r-- 1 office office 78133 Feb 25 18:36 jump-4.9-omap4-duovero-parlor.dts
+
+DTB file from SD card	=== dtc ===> DTS file:
+devicetree-3.18-duo-parlor-dtb			duo-parlor-3-18.dts
+devicetree-4.9-omap4-duo-parlor.dtb		jump-4.9-omap4-duovero-parlor.dts
+devicetree-zImage-jumpnow-duovero-parlor-nodisplay.dtb  ==>  duo-parlor-jumpnow-nodisplay.dts
+
+1. Names are too long; RENAME devicetree-* to dtb-:
+~/device_trees/src$ ls -l
+total 400
+-rw-r--r-- 1 office office 54885 Feb 24 16:12 dtb-3.18-duo-parlor-dtb
+-rw-r--r-- 1 office office 57021 Feb 25 18:34 dtb-4.9-omap4-duo-parlor.dtb
+-rw-r--r-- 1 office office 57044 Feb 24 16:14 dtb-jumpnow-duovero-parlor-nodisplay.dtb
+-rw-rw-r-- 1 office office 73276 Feb 24 16:13 duo-parlor-3-18.dts
+-rw-rw-r-- 1 office office 78251 Feb 24 16:15 duo-parlor-jumpnow-nodisplay.dts
+-rw-rw-r-- 1 office office 78133 Feb 25 18:36 jump-4.9-omap4-duovero-parlor.dts
+
+1a. ADD: [==B==]
+       devicetree-zImage-jumpnow-duovero-parlor.dtb
+       as:
+       dtb-jump-parlor.dtb,
+    run dtc on it > dts-jump-parlor.dts
+2. rename .dts to dts-[shorter, get rid of duovero (they are all for duovero) jump for jumpnow versions]
+ ls -l
+total 400
+-rw-r--r-- 1 office office 54885 Feb 24 16:12 dtb-3.18-duo-parlor-dtb
+-rw-r--r-- 1 office office 57021 Feb 25 18:34 dtb-4.9-omap4-duo-parlor.dtb
+-rw-r--r-- 1 office office 57044 Feb 24 16:14 dtb-jumpnow-duovero-parlor-nodisplay.dtb
+-rw-r--r-- 1 office office 57571 Feb 25 18:56 dtb-jump-parlor.dtb
+-rw-rw-r-- 1 office office 78251 Feb 24 16:15 dts-jump-nodisplay.dts
+-rw-rw-r-- 1 office office 78133 Feb 25 18:36 dts-jump-omap4.dts
+-rw-rw-r-- 1 office office 73276 Feb 24 16:13 dts-parlor-3-18.dts
+-rw-rw-r-- 1 office office 78933 Feb 25 19:02 dts-jump-parlor.dts
+
+(a) 54885 dtb-3.18-duo-parlor-dtb					==> 73276 dts-parlor-3-18.dts
+(b) 57021 dtb-4.9-omap4-duo-parlor.dtb				==> 78133 dts-jump-omap4.dts
+(c) 57044 dtb-jumpnow-duovero-parlor-nodisplay.dtb	==> 78251 dts-jump-nodisplay.dts
+(d) 57571 dtb-jump-parlor.dtb						==> 78933 dts-jump-parlor.dts
+
+Diff bet (c) and (d): (c) Does not have the Connector, dss@5800000: status="disabled" [dispc@58001000 - display?]
+
+Diff bet (b) and (d): (d) has added pinmux_spi1_pins, and spi4 pins.
+                 Constants in "linux,phandle = <0xMM> / phandle = <0xMM>  in MANY lines
+                 differ by one (d) <0x93>, (b) has <0x92>
+
+
+
+
+
+
 
 
 
