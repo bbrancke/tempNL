@@ -28,6 +28,21 @@ ls
 omap4-duovero-garret50c.dtb  omap4-duovero-parlor.dtb
 (two files only)
 
+in ~/yocto/poky/meta-gumstix/recipes-kernel/linux/linux-gumstix_3.18.bb:
+...
+KERNEL_DEVICETREE_duovero = "omap4-duovero-parlor.dtb \
+                             omap4-duovero-garret50c.dtb \
+"
+...
+
+~/yocto/build/tmp/work/duovero-poky-linux-gnueabi/linux-gumstix/3.18.21-r0/git/arch/arm/boot/dts/
+omap4-duovero-parlor.dts  is 4159 bytes, 2/23/2018. #includes:
+10:#include "omap4-duovero.dtsi"
+12:#include <dt-bindings/input/input.h>
+135:#include "omap-gpmc-smsc911x.dtsi"
+
+
+
 
 
 

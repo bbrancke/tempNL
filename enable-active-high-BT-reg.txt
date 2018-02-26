@@ -1,0 +1,82 @@
+3.18:
+In ==========> omap4-duovero.dtsi <==========
+11:
+/ {
+	model = "Gumstix Duovero";
+	compatible = "gumstix,omap4-duovero", "ti,omap4430", "ti,omap4";
+
+	memory {
+		device_type = "memory";
+		reg = <0x80000000 0x40000000>; /* 1 GB */
+	};
+... ...
+51:
+	vbat: fixedregulator@0 {
+		compatible = "regulator-fixed";
+	};
+
+	wlcore_wl_en: fixedregulator@1 {
+		compatible = "regulator-fixed";
+	};
+
+	wlcore_bt_en: fixedregulator@2 {
+		compatible = "regulator-fixed";
+	};
+};
+...
+242:
+
+/* on-board WiFi module */
+&vbat {
+	regulator-name = "vbat";
+	regulator-min-microvolt = <5000000>;
+	regulator-max-microvolt = <5000000>;
+};
+
+&wlcore_wl_en {
+        regulator-name = "regulator-wlcore-wl-en";
+        regulator-min-microvolt = <3300000>;
+        regulator-max-microvolt = <3300000>;
+        vin-supply = <&vbat>;
+        gpio = <&gpio2 11 0>;   /* gpio_43: WL Enable */
+        /* WLAN card specific delay */
+        startup-delay-us = <70000>;
+        enable-active-high;           <===== HERE
+};
+
+&wlcore_bt_en {
+        regulator-name = "regulator-wlcore-bt-en";
+        regulator-min-microvolt = <3300000>;
+        regulator-max-microvolt = <3300000>;
+        vin-supply = <&vbat>;
+        gpio = <&gpio2 15 0>;	/* gpio_47: BT Enable */
+        startup-delay-us = <70000>;
+        enable-active-high;            <===== and HERE
+};
+
+&mmc5 {
+	/* Wifi & Bluetooth on MMC #5 */
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&mmc5_pins>;
+	ti,bus-width = <4>;
+	vmmc-supply = <&wlcore_wl_en>;
+	vmmc_aux-supply = <&wlcore_bt_en>;
+	ti,non-removable;
+	ti,needs-special-hs-handling;
+	cap-power-off-card;
+	keep-power-in-suspend;
+	ti,dual-volt;
+	max-frequency = <40000000>;
+};
+
+&uart2 {
+	/* Wilink8 Bluetooth */
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart2_pins>;
+};
+
+&twl_usb_comparator {  don't care...
+	usb-supply = <&vusb>
+...  } 
