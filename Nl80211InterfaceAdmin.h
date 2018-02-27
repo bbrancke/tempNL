@@ -35,6 +35,7 @@ protected:
 	bool CreateMonitorInterface(const char *newInterfaceName, uint32_t phyId);
 	bool DeleteInterface(const char *interfaceName);
 private:
+	void IfTypeToString(uint32_t iftype, string& strType);
 	bool _createInterface(const char *newInterfaceName, 
 		uint32_t phyId, enum nl80211_iftype type);
 };

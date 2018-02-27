@@ -16,6 +16,7 @@ int Nl80211Base::list_interface_handler(struct nl_msg *msg, void *arg)
 
 	int len;
 	uint32_t phyId;
+	uint32_t interfaceType;
 	const char *interfaceName;
 	const uint8_t *macAddress;
 
@@ -28,13 +29,15 @@ int Nl80211Base::list_interface_handler(struct nl_msg *msg, void *arg)
 	// Need these values to fill a new OneInterface:
 	if (tb_msg[NL80211_ATTR_IFNAME]
 		&& tb_msg[NL80211_ATTR_WIPHY]
-		&& tb_msg[NL80211_ATTR_MAC])
+		&& tb_msg[NL80211_ATTR_MAC]
+		&& tb_msg[NL80211_ATTR_IFTYPE])
 	{
 		phyId = nla_get_u32(tb_msg[NL80211_ATTR_WIPHY]);
+		interfaceType = nla_get_u32(tb_msg[NL80211_ATTR_IFTYPE]);
 		interfaceName = nla_get_string(tb_msg[NL80211_ATTR_IFNAME]);
 		len = nla_len(tb_msg[NL80211_ATTR_MAC]);
 		macAddress = (uint8_t *)nla_data(tb_msg[NL80211_ATTR_MAC]);
-		instance->AddInterfaceToList(phyId, interfaceName, len, macAddress);
+		instance->AddInterfaceToList(phyId, interfaceName, len, macAddress, interfaceType);
 	}
 	else
 	{
@@ -93,9 +96,9 @@ void Nl80211Base::ClearInterfaceList()
 }
 
 void Nl80211Base::AddInterfaceToList(uint32_t phyId, const char *interfaceName,
-		int macLength, const uint8_t *macAddress)
+		int macLength, const uint8_t *macAddress, uint32_t interfaceType)
 {
-	OneInterface *pI = new OneInterface(phyId, interfaceName, macAddress, macLength);
+	OneInterface *pI = new OneInterface(phyId, interfaceName, macAddress, macLength, interfaceType);
 	m_interfaces.push_back(pI);
 }
 

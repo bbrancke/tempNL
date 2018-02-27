@@ -44,6 +44,59 @@ bool Nl80211InterfaceAdmin::GetInterfaceList()
 	return true;
 }
 
+/*********
+enum nl80211_iftype {
+	NL80211_IFTYPE_UNSPECIFIED,
+	NL80211_IFTYPE_ADHOC,
+	NL80211_IFTYPE_STATION,
+	NL80211_IFTYPE_AP,
+	NL80211_IFTYPE_AP_VLAN,
+	NL80211_IFTYPE_WDS,
+	NL80211_IFTYPE_MONITOR,
+	NL80211_IFTYPE_MESH_POINT,
+
+	// Last:
+	__NL80211_IFTYPE_AFTER_LAST,
+	NL80211_IFTYPE_MAX = __NL80211_IFTYPE_AFTER_LAST - 1
+};
+**********/
+void Nl80211InterfaceAdmin::IfTypeToString(uint32_t iftype, string& strType)
+{
+	enum nl80211_iftype type = (enum nl80211_iftype)iftype;
+	stringstream s;
+	switch (type)
+	{
+		case nl80211_iftype::NL80211_IFTYPE_UNSPECIFIED:
+			strType = "Unspecified ";
+			break;
+		case nl80211_iftype::NL80211_IFTYPE_ADHOC:
+			strType = "Ad Hoc      ";
+			break;
+		case nl80211_iftype::NL80211_IFTYPE_STATION:
+			strType = "Station     ";
+			break;
+		case nl80211_iftype::NL80211_IFTYPE_AP:
+			strType = "Access Point";
+			break;
+		case nl80211_iftype::NL80211_IFTYPE_AP_VLAN:
+			strType = "AP VLAN     ";
+			break;
+		case nl80211_iftype::NL80211_IFTYPE_WDS:
+			strType = "WDS         ";
+			break;
+		case nl80211_iftype::NL80211_IFTYPE_MONITOR:
+			strType = "Monitor     ";
+			break;
+		case nl80211_iftype::NL80211_IFTYPE_MESH_POINT:
+			strType = "Mesh Point  ";
+			break;
+		default:
+			s << "Unknown (" << iftype << ")";
+			strType = s.str();
+			break;
+	}
+}
+
 void Nl80211InterfaceAdmin::LogInterfaceList(const char *caller)
 {
 	int j;
@@ -51,16 +104,19 @@ void Nl80211InterfaceAdmin::LogInterfaceList(const char *caller)
 	s << "Nl80211Base: " << caller << ": Interface List has " <<
 		m_interfaces.size() << " elements:";
 	LogInfo(s);
-	LogInfo("        \tName:\tPhy\tMAC");
+	LogInfo("        \tName:\tPhy\tType\tMAC");
 	j = 0;
 	for (OneInterface *i : m_interfaces)
 	{
 		stringstream info;
+		string strIftype;
 		char buf[32];
 		uint8_t *p = i->mac;
 		sprintf(buf, "%02x:%02x:%02x:%02x:%02x:%02x",
 			p[0], p[1], p[2], p[3], p[4], p[5]);
-		info << "List # " << j << "\t" << i->name << "\t" << i->phy << "\t" << buf;
+		IfTypeToString(i->iftype, strIftype);
+		info << "List # " << j << "\t" << i->name << "\t" << i->phy
+			<< "\t" << strIftype << "\t" << buf;
 		LogInfo(info);
 		j++;
 	}

@@ -85,7 +85,7 @@ public:
 	bool SendAndFreeMessage();
 	void ClearInterfaceList();
 	void AddInterfaceToList(uint32_t phyId, const char *interfaceName,
-		int macLength, const uint8_t *macAddress);
+		int macLength, const uint8_t *macAddress, uint32_t interfaceType);
 protected:
 	Nl80211Base() { }
 	vector<OneInterface *> m_interfaces;

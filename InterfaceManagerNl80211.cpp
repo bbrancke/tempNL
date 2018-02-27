@@ -314,7 +314,7 @@ LogInterfaceList("CreateInterfaces: II");
 	}
 	else
 	{
-		if (!CreateApInterface("mon0", phyId))
+		if (!CreateMonitorInterface("mon0", phyId))
 		{
 			LogErr(AT, "CreateInterfaces(): Can't create mon0 interface.");
 			return false;

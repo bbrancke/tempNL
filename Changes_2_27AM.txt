@@ -1,0 +1,7 @@
+	modified:   InterfaceManagerNl80211.cpp
+	modified:   Nl80211Base.cpp
+	modified:   Nl80211Base.h
+	modified:   Nl80211InterfaceAdmin.cpp
+	modified:   Nl80211InterfaceAdmin.h
+	modified:   OneInterface.h
+
